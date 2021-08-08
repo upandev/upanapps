@@ -25,6 +25,8 @@
 # include <Msh.h>
 # include <MshCommandExecutor.h>
 # include <MshCommands.h>
+# include <GraphicsContext.h>
+# include <ConsoleCanvas.h>
 
 Msh::Msh() : _prompt("msh:"), _cmdLinePos(0) {
   auto add_cmd = [&](MshCommand* cmd) {
@@ -76,8 +78,11 @@ void Msh::processCommandLine() {
 	clearCommandLine() ;
 }
 
-void Msh::start()
-{
+void Msh::start() {
+  upanui::GraphicsContext::Init();
+  //you can't pass objects on stack as params to threads (ConsoleCanvas has internal threads for cursor, etc.)
+  upan::uniq_ptr<upanui::ConsoleCanvas> consoleCanvas(new upanui::ConsoleCanvas(upanui::GraphicsContext::Instance().frame()));
+
 	char ch ;
 
 	puts("\n\n Welcome to Mos Shell") ;

@@ -54,12 +54,12 @@ private:
 };
 
 static void thread(void* param) {
-  int seed = atoi((const char*)param);
+  Num* n = static_cast<Num*>(param);
   upan::vector<Num*> nums;
-  printf("\n Seed: %d", seed);
-  for(int j = 0; j < seed; ++j) {
+  printf("\n Seed: %d", n->getI());
+  for(int j = 0; j < n->getI(); ++j) {
     for (int i = 0; i < 1000; ++i) {
-      nums.push_back(new Num(seed + i));
+      nums.push_back(new Num(n->getI() + i));
     }
     int sum = 0;
     for (int i = 0; i < nums.size(); ++i) {
@@ -72,6 +72,7 @@ static void thread(void* param) {
     }
     nums.clear();
   }
+  delete n;
 }
 
 void lock_thread(void* param) {
@@ -87,8 +88,9 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       recurse(count);
     } else if (type == "thread") {
       const char* seed = cmdExec.params().size() > 1 ? cmdExec.params()[1].c_str() : "0";
-      int threadID = exect(thread, (void*)seed);
-      //waitpid(threadID);
+      Num* n = new Num(atoi(seed));
+      int threadID = exect(thread, (void*)n);
+      waitpid(threadID);
       printf("\n Thread ID: %d", threadID);
     } else if (type == "mem") {
       uint32_t s = btime();
