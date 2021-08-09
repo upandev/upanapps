@@ -114,7 +114,7 @@ void MshCommandEcho::execute(const MshCommandExecutor& cmdExec) {
 }
 
 void MshCommandClearScreen::execute(const MshCommandExecutor& cmdExec) {
-  clrscr();
+  Msh::Instance().getConsoleCanvas()->clearScreen();
 }
 
 void MshCommandExit::execute(const MshCommandExecutor& cmdExec) {
@@ -232,7 +232,7 @@ void MshCommandCopyFile::execute(const MshCommandExecutor& cmdExec) {
   }
 
   printf("\n Progress = ") ;
-  int cr = get_cursor() ;
+  int cr = Msh::Instance().getConsoleCanvas()->getCurPos();
 
   int progress = 0 ;
 
