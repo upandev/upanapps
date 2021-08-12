@@ -19,7 +19,7 @@
 
 #include <ustring.h>
 #include <map.h>
-#include <ConsoleCanvas.h>
+#include <TerminalConsole.h>
 
 #define COMMAND_LINE_SIZE 70
 
@@ -43,10 +43,6 @@ public:
     return _commands;
   }
 
-  upanui::ConsoleCanvas* getConsoleCanvas() {
-    return _consoleCanvas.get();
-  }
-
 private:
   void displayPrompt();
   void clearCommandLine();
@@ -57,5 +53,4 @@ private:
   uint32_t _cmdLinePos;
   char _cmdLine[COMMAND_LINE_SIZE];
   CmdMap _commands;
-  upan::uniq_ptr<upanui::ConsoleCanvas> _consoleCanvas;
 };

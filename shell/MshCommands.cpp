@@ -114,7 +114,7 @@ void MshCommandEcho::execute(const MshCommandExecutor& cmdExec) {
 }
 
 void MshCommandClearScreen::execute(const MshCommandExecutor& cmdExec) {
-  Msh::Instance().getConsoleCanvas()->clearScreen();
+  upanui::TerminalConsole::Instance().clearScreen();
 }
 
 void MshCommandExit::execute(const MshCommandExecutor& cmdExec) {
@@ -232,7 +232,7 @@ void MshCommandCopyFile::execute(const MshCommandExecutor& cmdExec) {
   }
 
   printf("\n Progress = ") ;
-  int cr = Msh::Instance().getConsoleCanvas()->getCurPos();
+  int cr = upanui::TerminalConsole::Instance().getCurPos();
 
   int progress = 0 ;
 

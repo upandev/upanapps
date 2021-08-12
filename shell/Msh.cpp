@@ -26,7 +26,6 @@
 # include <MshCommandExecutor.h>
 # include <MshCommands.h>
 # include <GraphicsContext.h>
-# include <ConsoleCanvas.h>
 
 Msh::Msh() : _prompt("msh:"), _cmdLinePos(0) {
   auto add_cmd = [&](MshCommand* cmd) {
@@ -80,12 +79,11 @@ void Msh::processCommandLine() {
 
 [[noreturn]] void Msh::start() {
   upanui::GraphicsContext::Init();
-  //you can't pass objects on stack as params to threads (ConsoleCanvas has internal threads for cursor, etc.)
-  _consoleCanvas.reset(new upanui::ConsoleCanvas(upanui::GraphicsContext::Instance().frame()));
+  upanui::TerminalConsole::Create();
 
 	char ch ;
 
-	_consoleCanvas->puts("\n\n Welcome to Mos Shell");
+	upanui::TerminalConsole::Instance().puts("\n\n Welcome to Mos Shell");
 
   displayPrompt() ;
 
@@ -115,8 +113,8 @@ void Msh::processCommandLine() {
 				if(_cmdLinePos > 0)	{
 					_cmdLinePos-- ;
 					int x = _cmdLine[_cmdLinePos] == '\t' ? 4 : 1 ;
-					_consoleCanvas->moveCursor(-x);
-					_consoleCanvas->clearLine(upanui::ConsoleBuffer::START_CURSOR_POS);
+					upanui::TerminalConsole::Instance().moveCursor(-x);
+					upanui::TerminalConsole::Instance().clearLine(upanui::ConsoleBuffer::START_CURSOR_POS);
 				}
 				break ;
 				
@@ -128,14 +126,14 @@ void Msh::processCommandLine() {
 				break ;
 
 			case Keyboard_ENTER:
-			  _consoleCanvas->putc('\n') ;
+			  upanui::TerminalConsole::Instance().putc('\n') ;
         processCommandLine() ;
 				displayPrompt();
 				break ;
 
 			default:
 				if(_cmdLinePos < COMMAND_LINE_SIZE) {
-				  _consoleCanvas->putc(ch) ;
+				  upanui::TerminalConsole::Instance().putc(ch) ;
           _cmdLine[_cmdLinePos++] = ch ;
 				}
 		}
