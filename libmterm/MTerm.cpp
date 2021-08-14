@@ -18,8 +18,9 @@
 # include <MTerm.h>
 # include <malloc.h>
 # include <stdio.h>
-# include <ctype.h>
 # include <string.h>
+#include <GraphicsContext.h>
+#include <ConsoleCanvas.h>
 
 static unsigned MAX_ROWS;
 static unsigned MAX_COLS;
@@ -82,11 +83,17 @@ void MTerm_DestroyWindow(MWindow* pMWindow)
 	}	
 }
 
-void MTerm_InitScr()
-{
-  console_size(&MAX_ROWS, &MAX_COLS);
+static upanui::ConsoleCanvas* _consoleCanvas = nullptr;
+
+void MTerm_InitScr() {
+  upanui::GraphicsContext::Init();
+  _consoleCanvas = new upanui::ConsoleCanvas(upanui::GraphicsContext::Instance().frame());
+
+  MAX_ROWS = _consoleCanvas->maxRows();
+  MAX_COLS = _consoleCanvas->maxColumns();
   MAX_WIN_BUFFER = MAX_ROWS * MAX_COLS;
-	clrscr() ;
+
+  _consoleCanvas->clearScreen();
 }
 
 unsigned MTerm_MaxRows()
@@ -183,15 +190,15 @@ void MTerm_WinPutCharSpec(MWindow* pMWindow, char Ch, byte Attr)
 	if(pMWindow->InstantUpdate)
 	{
 		int iCurPos = MTerm_GetActualCursorPos(pMWindow) ;
-		int iOldPos = get_cursor() ;
-		set_cursor(iCurPos) ;
+		int iOldPos = _consoleCanvas->getCurPos();
+		_consoleCanvas->setCurPos(iCurPos);
 
-		uiwritec(Ch, Attr, true) ;
+		_consoleCanvas->rawputc(Ch, Attr, true);
 
 		if(pMWindow->Focus)
-			set_cursor(iCurPos + 1) ;
+		  _consoleCanvas->setCurPos(iCurPos + 1) ;
 		else
-			set_cursor(iOldPos) ;
+		  _consoleCanvas->setCurPos(iOldPos) ;
 	}
 
 	MChar* pMChar =	(MChar*)&(pMWindow->CharContent[pMWindow->CursorPos]) ;
@@ -244,13 +251,13 @@ void MTerm_WinPutString(MWindow* pMWindow, const char* szStr, int len)
 void MTerm_WinRefresh(const MWindow* pMWindow)
 {
 	int iCurPos = MTerm_GetActualCursorPosGeneric(pMWindow->Cols, pMWindow->PilotPoint, 0) ;
-	int iOldPos = get_cursor() ;
-  uiwritea(pMWindow->CharContent, pMWindow->Rows, pMWindow->Cols, iCurPos);
+	int iOldPos = _consoleCanvas->getCurPos() ;
+	_consoleCanvas->rawputa(pMWindow->CharContent, pMWindow->Rows, pMWindow->Cols, iCurPos);
 
 	if(pMWindow->Focus)
-		set_cursor(MTerm_GetActualCursorPos(pMWindow)) ;
+	  _consoleCanvas->setCurPos(MTerm_GetActualCursorPos(pMWindow)) ;
 	else
-		set_cursor(iOldPos) ;
+	  _consoleCanvas->setCurPos(iOldPos) ;
 }
 
 void MTerm_ScrollDown(MWindow* pMWindow)

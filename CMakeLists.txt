@@ -99,6 +99,7 @@ target_compile_options(mcal PRIVATE ${SO_COMPILE_FLAGS})
 execute_process(COMMAND bash -c "cd ${PROJECT_SOURCE_DIR}; find ./libmterm -name '*.cpp' | grep -v CMakeFile" OUTPUT_VARIABLE LIBMTERM_SRC)
 string(REPLACE "\n" ";" LIBMTERM_SRC ${LIBMTERM_SRC})
 add_library(mterm SHARED "${LIBMTERM_SRC}")
+target_link_libraries(mterm cxxrt)
 target_compile_options(mterm PRIVATE ${SO_COMPILE_FLAGS})
 
 add_custom_target(crt
