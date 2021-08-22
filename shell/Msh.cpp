@@ -88,8 +88,8 @@ void Msh::processCommandLine() {
   displayPrompt() ;
 
 	while(true) {
-		kb_get_ch_wait((int*)&ch) ;
-		
+	  int ch = getchar();
+
 		switch(ch)
 		{	
 			case Keyboard_LEFT_ALT:
