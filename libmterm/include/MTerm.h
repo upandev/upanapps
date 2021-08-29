@@ -21,6 +21,7 @@
 # include <cdisplay.h>
 # include <stdlib.h>
 # include <ColorPalettes.h>
+#include <ConsoleCanvas.h>
 
 #define WIN_SIZE(Win)		( Win->Rows * Win->Cols )
 
@@ -65,7 +66,7 @@ typedef struct
 
 MWindow* MTerm_CreateWindow(byte nRows, byte nCols) ;
 void MTerm_DestroyWindow(MWindow* pMWindow) ;
-void MTerm_InitScr() ;
+upanui::ConsoleCanvas* MTerm_InitScr() ;
 unsigned MTerm_MaxRows();
 unsigned MTerm_MaxColumns();
 void MTerm_WinRefresh(const MWindow* pMWindow) ;

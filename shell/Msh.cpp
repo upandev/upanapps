@@ -81,8 +81,6 @@ void Msh::processCommandLine() {
   upanui::GraphicsContext::Init();
   upanui::TerminalConsole::Create();
 
-	char ch ;
-
 	upanui::TerminalConsole::Instance().puts("\n\n Welcome to Mos Shell");
 
   displayPrompt() ;

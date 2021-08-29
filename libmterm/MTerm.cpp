@@ -85,7 +85,7 @@ void MTerm_DestroyWindow(MWindow* pMWindow)
 
 static upanui::ConsoleCanvas* _consoleCanvas = nullptr;
 
-void MTerm_InitScr() {
+upanui::ConsoleCanvas* MTerm_InitScr() {
   upanui::GraphicsContext::Init();
   _consoleCanvas = new upanui::ConsoleCanvas(upanui::GraphicsContext::Instance().frame());
 
@@ -94,6 +94,7 @@ void MTerm_InitScr() {
   MAX_WIN_BUFFER = MAX_ROWS * MAX_COLS;
 
   _consoleCanvas->clearScreen();
+  return _consoleCanvas;
 }
 
 unsigned MTerm_MaxRows()

@@ -20,6 +20,7 @@
 # include <kb.h>
 # include <fs.h>
 # include <string.h>
+#include <GraphicsContext.h>
 
 MWindow *pOkWin, *pCancelWin ;
 
@@ -132,7 +133,7 @@ void Action_OkCancel()
 	MTerm_SetWinAttr(pOkWin, ATTR_NOBLINK | ColorPalettes::CP16::FG_RED | ColorPalettes::CP16::BG_BLACK) ;
 	MTerm_WinRefresh(pOkWin) ;
 
-	kb_get_ch_wait(&ch) ;
+	ch = upanui::GraphicsContext::Instance().eventManager().getch();
 
 	while(ch != Keyboard_ENTER)
 	{
@@ -153,11 +154,11 @@ void Action_OkCancel()
 
 			MTerm_WinMove(pOkWin, 0, 0) ;
 			MTerm_SetWinAttr(pOkWin, ATTR_NOBLINK | ColorPalettes::CP16::FG_RED | ColorPalettes::CP16::BG_BLACK) ;
-		} 
+		}
 
 		Action_RefershOkCancel() ;
 
-		kb_get_ch_wait(&ch) ;
+		ch = upanui::GraphicsContext::Instance().eventManager().getch();
 	}
 
 	MTerm_DestroyWindow(pOkWin) ;

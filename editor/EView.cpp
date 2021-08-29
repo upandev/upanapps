@@ -26,6 +26,7 @@
 # include <Action.h>
 # include <Edit.h>
 # include <EView.h>
+# include <GraphicsContext.h>
 
 static byte EView_backWinRows, EView_backWinCols, EView_editWinRows, EView_editWinCols ;
 static const int filem = 1, warn = 0, chance = 1;
@@ -33,6 +34,11 @@ const int editw = 3 ;
 char bakfile[110] = "\0" ;
 
 #define MENU_COLS 15
+
+PopupMenuType _currentPopupMenuType = PopupMenuType::NA_Menu;
+PopupDialogType _currentPopupDialogType = PopupDialogType::NA_Dialog;
+MWindow* _currentDialogWindow = nullptr;
+int _currentMenuIndex = 1;
 
 /**************** static functions *********************/
 
@@ -42,70 +48,27 @@ static void EView_DrawBorderInBack(MWindow* pWin)
 	MTerm_WinPutCharInRange(pWin, '-', pWin->Rows - 1, 0, pWin->Cols) ;
 }
 
-static int EView_DrawMenu(const char *text[], int no_rows, int start_y, int start_x)
-{
-	int i, j, ch, res = -1, over = 0 ;
+static void EView_DrawMenu(PopupMenuType menuType, const char *text[], int no_rows, int start_y, int start_x) {
 
-	MWindow* pMenuWin = MTerm_CreateWindow(no_rows, MENU_COLS) ;
-	MTerm_SetWinPilotPoint(pMenuWin, start_y * MTerm_MaxColumns() + start_x) ;
-	MTerm_SetWinAttr(pMenuWin, ATTR_NOBLINK | ColorPalettes::CP16::FG_BLACK | ColorPalettes::CP16::BG_WHITE) ;
-	MTerm_WinFocus(pMenuWin, true) ;
+  _currentDialogWindow = MTerm_CreateWindow(no_rows, MENU_COLS) ;
+  _currentPopupMenuType = menuType;
+	_currentMenuIndex = 1;
 
-	EView_DrawBorderInBack(pMenuWin) ;
+	MTerm_SetWinPilotPoint(_currentDialogWindow, start_y * MTerm_MaxColumns() + start_x) ;
+	MTerm_SetWinAttr(_currentDialogWindow, ATTR_NOBLINK | ColorPalettes::CP16::FG_BLACK | ColorPalettes::CP16::BG_WHITE) ;
+	MTerm_WinFocus(_currentDialogWindow, true) ;
 
-	for(i = 0; i < no_rows - 2; i++)
-		MTerm_WinMovePutString(pMenuWin, i + 1, 1, text[i]) ;
+	EView_DrawBorderInBack(_currentDialogWindow) ;
 
-	i = 1;
+	for(int i = 0; i < no_rows - 2; i++)
+	  MTerm_WinMovePutString(_currentDialogWindow, i + 1, 1, text[i]) ;
 
-	MTerm_WinRefresh(pMenuWin) ;
-
-	while(true)
-	{
-		MTerm_SetAttr(pMenuWin, i, 1, MENU_COLS - 2, ATTR_NOBLINK | ColorPalettes::CP16::FG_BLACK | ColorPalettes::CP16::BG_RED) ;
-
-		MTerm_WinRefresh(pMenuWin) ;
-		
-		j = i;
-
-		kb_get_ch_wait(&ch) ;
-
-		switch(ch)
-		{
-		case Keyboard_KEY_UP:
-				i = (i == 1) ? no_rows - 2 : i - 1 ;
-				break ;
-		case Keyboard_KEY_DOWN:
-				i = (i == no_rows - 2) ? 1 : i + 1 ;
-				break ;
-		case Keyboard_ESC:
-				over = 1 ;
-				res = -1 ;
-				break ;
-		case Keyboard_ENTER:
-				over = 1 ;
-				res = i ;
-				break ;
-		default:
-				break ;
-		}
-
-		if(over)
-		{
-			EView_Refresh() ;
- 			MTerm_DestroyWindow(pMenuWin) ;
-			return res ;
-		}
-
-		MTerm_SetAttr(pMenuWin, j, 1, MENU_COLS - 2, ATTR_NOBLINK | ColorPalettes::CP16::FG_BLACK | ColorPalettes::CP16::BG_WHITE) ;
-	}
-
-	return 0 ;
+	MTerm_SetAttr(_currentDialogWindow, 1, 1, MENU_COLS - 2, ATTR_NOBLINK | ColorPalettes::CP16::FG_BLACK | ColorPalettes::CP16::BG_RED) ;
+	MTerm_WinRefresh(_currentDialogWindow) ;
 }
 
 static void EView_WarningBox(const char text[], int interact)
 {
-	int ch ;
 	MWindow* pWarnWin = MTerm_CreateWindow(7, 40) ;
 	MTerm_SetWinPilotPoint(pWarnWin, 5 * MTerm_MaxColumns() + 20) ;
 	MTerm_SetWinAttr(pWarnWin, ATTR_BLINK | ColorPalettes::CP16::FG_BLACK | ColorPalettes::CP16::BG_WHITE) ;
@@ -123,7 +86,7 @@ static void EView_WarningBox(const char text[], int interact)
 	}
 	else
 	{
-		kb_get_ch_wait(&ch) ;
+	  upanui::GraphicsContext::Instance().eventManager().getch();
 	}
 
 	MTerm_DestroyWindow(pWarnWin) ;
@@ -131,23 +94,31 @@ static void EView_WarningBox(const char text[], int interact)
 	MTerm_WinRefresh(Edit_pEditWin) ;
 }
 
-static void win_echo(char ch, void* pd) {
-  MWindow* pMsgWin = (MWindow*)pd;
-  if(ch == Keyboard_BACKSPACE)
-  {
-    int y, x ;
+static void win_scan(MWindow* pMsgWin, char* tempfl) {
+  int i = 0;
+  while(true) {
+    int ch = upanui::GraphicsContext::Instance().eventManager().getch();
 
-    MTerm_GetWinYX(pMsgWin, &y, &x) ;
-    MTerm_WinMove(pMsgWin, y, x - 1) ;
-    MTerm_WinClearLineFromCursor(pMsgWin) ;
-  }
-  else
-  {
-    MTerm_WinPutChar(pMsgWin, ch) ;
-  }
+    if (ch == Keyboard_ENTER) {
+      tempfl[i] = '\0';
+      return;
+    } else if(ch == Keyboard_BACKSPACE) {
+      int y, x ;
 
-  MTerm_WinRefresh(pMsgWin) ;
-  Action_RefershOkCancel() ;
+      MTerm_GetWinYX(pMsgWin, &y, &x) ;
+      MTerm_WinMove(pMsgWin, y, x - 1) ;
+      MTerm_WinClearLineFromCursor(pMsgWin) ;
+      --i;
+      tempfl[i] = '\0';
+    } else {
+      tempfl[i] = ch;
+      ++i;
+      MTerm_WinPutChar(pMsgWin, ch) ;
+    }
+
+    MTerm_WinRefresh(pMsgWin) ;
+    Action_RefershOkCancel() ;
+  }
 }
 
 static void EView_MessageBox(const char text[], int margin, int *value, int option)
@@ -177,7 +148,7 @@ static void EView_MessageBox(const char text[], int margin, int *value, int opti
 	switch(option)
 	{
 	case 1://Read filename
-		scanf_cecho(&win_echo, pMsgWin, "%s", tempfl) ;
+	  win_scan(pMsgWin, tempfl);
 		Action_OkCancel() ;
 
 		if(tempfl[0] == '\0')
@@ -191,7 +162,8 @@ static void EView_MessageBox(const char text[], int margin, int *value, int opti
 		break ;
 
 	case 2://Read Pagesetup
-		scanf_cecho(&win_echo, pMsgWin, "%d",value) ;
+	  win_scan(pMsgWin, tempfl);
+	  *value = atoi(tempfl);
 		Action_OkCancel() ;
 		break ;
 		
@@ -200,7 +172,7 @@ static void EView_MessageBox(const char text[], int margin, int *value, int opti
 			free(word) ;
 		word = (char*)malloc(sizeof(char) * 105) ;
 		word[0] = '\0';
-		scanf_cecho(&win_echo, pMsgWin, "%s", word) ;
+    win_scan(pMsgWin, word);
 		Action_OkCancel() ;
 		
 		if(word[0] == '\0')
@@ -219,6 +191,7 @@ static void EView_ConfirmSave()
 
 	if(fd >= 0)
 	{
+	  close(fd) ;
 		EView_WarningBox("**File Already Exist : Overwrite File?**", chance) ;
 
 		if(ok)
@@ -238,8 +211,6 @@ static void EView_ConfirmSave()
 		else
 			Action_FileSave() ;
 	}
-
-	close(fd) ;
 }
 
 static void EView_CheckSave()
@@ -263,9 +234,7 @@ static void EView_CheckSave()
 	}
 }
 
-static void help(int abus)
-{
-	int key ;
+static void help(int abus) {
 	MWindow* pHelpWin = MTerm_CreateWindow(21, 75) ;
 	MTerm_SetWinPilotPoint(pHelpWin, 2 * MTerm_MaxColumns() + 2) ;
 	MTerm_SetWinAttr(pHelpWin, ATTR_NOBLINK | ColorPalettes::CP16::FG_WHITE | ColorPalettes::CP16::BG_BLACK) ;
@@ -315,16 +284,8 @@ static void help(int abus)
 
 	MTerm_WinRefresh(pHelpWin) ;
 
-	do
-	{
-		kb_get_ch_wait(&key) ;
-	}
-	while(key != Keyboard_ENTER) ;
-
-	MTerm_DestroyWindow(pHelpWin) ;
-
-	MTerm_WinRefresh(Edit_pBackWin) ;
-	MTerm_WinRefresh(Edit_pEditWin) ;
+	_currentDialogWindow = pHelpWin;
+  _currentPopupDialogType = PopupDialogType::HelpDialog;
 }
 
 /******************************************************/
@@ -422,27 +383,91 @@ void EView_DisplayStatus()
 	MTerm_WinRefresh(Edit_pStatusWin) ;
 }
 
-void EView_FileMenu(int scut)
-{
-	const char *text[] = {
-		"New      Ct+N", 
-		"Open     Ct+O",
-		"Save     Ct+S",
-		"Save as  Ct+A",
-		"Exit     Ct+X"
-	} ;
+PopupMenuType EView_getCurrentPopupMenuType() {
+  return _currentPopupMenuType;
+}
 
-	int key, res ;
+PopupDialogType EView_getCurrentPopupDialogType() {
+  return _currentPopupDialogType;
+}
 
-	if(!scut)
-	{
-		key = EView_DrawMenu(text, 7, 1, 0) ; //6 Items -> 8 rows : 2 for border
-	}
-	else
-	{
-		key = scut ;
-	}
- 
+void EView_HandleMenuActions(int ch) {
+  int j = _currentMenuIndex;
+
+  bool over = false;
+  int res = -1;
+
+  switch(ch) {
+    case Keyboard_KEY_UP:
+      _currentMenuIndex = (_currentMenuIndex == 1) ? _currentDialogWindow->Rows - 2 : _currentMenuIndex - 1 ;
+      break ;
+    case Keyboard_KEY_DOWN:
+      _currentMenuIndex = (_currentMenuIndex == _currentDialogWindow->Rows - 2) ? 1 : _currentMenuIndex + 1 ;
+      break ;
+    case Keyboard_ESC:
+      over = true ;
+      res = -1 ;
+      break ;
+    case Keyboard_ENTER:
+      over = true ;
+      res = _currentMenuIndex ;
+      break ;
+    default:
+      break ;
+  }
+
+  if(over) {
+    EView_Refresh() ;
+    MTerm_DestroyWindow(_currentDialogWindow) ;
+    switch(_currentPopupMenuType) {
+      case File:
+        EView_OnFileMenu(res);
+        break;
+      case Edit:
+        EView_OnEditMenu(res);
+        break;
+      case Help:
+        EView_OnHelpMenu(res);
+        break;
+      default:
+        break;
+    }
+    _currentPopupMenuType = PopupMenuType::NA_Menu;
+  } else {
+    MTerm_SetAttr(_currentDialogWindow, j, 1, MENU_COLS - 2, ATTR_NOBLINK | ColorPalettes::CP16::FG_BLACK | ColorPalettes::CP16::BG_WHITE) ;
+    MTerm_SetAttr(_currentDialogWindow, _currentMenuIndex, 1, MENU_COLS - 2, ATTR_NOBLINK | ColorPalettes::CP16::FG_BLACK | ColorPalettes::CP16::BG_RED) ;
+    MTerm_WinRefresh(_currentDialogWindow) ;
+  }
+}
+
+void EView_HandleHelpDialogActions(int key) {
+  if (key != Keyboard_ENTER) {
+    return;
+  }
+
+  MTerm_DestroyWindow(_currentDialogWindow) ;
+
+  _currentDialogWindow = nullptr;
+  _currentPopupDialogType = PopupDialogType::NA_Dialog;
+
+  MTerm_WinRefresh(Edit_pBackWin) ;
+  MTerm_WinRefresh(Edit_pEditWin) ;
+}
+
+void EView_OpenFileMenu() {
+  const char *text[] = {
+      "New      Ct+N",
+      "Open     Ct+O",
+      "Save     Ct+S",
+      "Save as  Ct+A",
+      "Exit     Ct+X"
+  } ;
+
+  EView_DrawMenu(PopupMenuType::File, text, 7, 1, 0) ; //6 Items -> 8 rows : 2 for border
+}
+
+void EView_OnFileMenu(int key) {
+  int res;
 	switch(key)
 	{
 	case 1: // New
@@ -513,23 +538,19 @@ void EView_FileMenu(int scut)
 	}
 }
 
-void EView_EditMenu(int scut)
-{
-	const char *text[] = {
-		"Del Line Ct+D",
-		"Del Word Ct+R",
-		"Ins Line Ct+K",
-		"Ins Word Ct+W"
-	} ;
+void EView_OpenEditMenu() {
+  const char *text[] = {
+      "Del Line Ct+D",
+      "Del Word Ct+R",
+      "Ins Line Ct+K",
+      "Ins Word Ct+W"
+  } ;
 
-	int key ;
+  EView_DrawMenu(PopupMenuType::Edit, text, 6, 1, 17) ;
+}
 
-	if(!scut)
-		key = EView_DrawMenu(text, 6, 1, 17) ;
-	else
-		key = scut ;
- 
-	switch(key)
+void EView_OnEditMenu(int key) {
+  switch(key)
 	{
 	case 1://Delete line
 		Edit_DeleteLine() ;
@@ -555,16 +576,15 @@ void EView_EditMenu(int scut)
 		break ;
 	default:
 		break ;
-	}         
+	}
 }
 
-void EView_HelpMenu()
-{
-	const char *text[] = { "About Us     ","Hot Keys     " } ;
-	int key ;
+void EView_OpenHelpMenu() {
+  const char *text[] = { "About Us     ","Hot Keys     " } ;
+  EView_DrawMenu(PopupMenuType::Help, text, 4, 1, 65) ;
+}
 
-	key = EView_DrawMenu(text, 4, 1, 65) ;
-
+void EView_OnHelpMenu(int key) {
 	switch(key)
 	{
 	case 1://About us
@@ -576,5 +596,5 @@ void EView_HelpMenu()
 	default:
 		break;
 	}
-}  
+}
 

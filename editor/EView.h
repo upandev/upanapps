@@ -18,14 +18,31 @@
 #ifndef _EVIEW_H_
 #define _EVIEW_H_
 
+enum PopupMenuType {
+  File, Edit, Help, NA_Menu
+};
+
+enum PopupDialogType {
+  HelpDialog, WarningDialog, OKCancelWarningDialog, NA_Dialog
+};
+
 void EView_DrawInitBack() ;
 void EView_DrawMenuBar() ;
 void EView_DrawStatusBar() ;
 void EView_DisplayStatus() ;
 void EView_Release() ;
 void EView_Refresh() ;
-void EView_FileMenu(int scut) ;
-void EView_EditMenu(int scut) ;
-void EView_HelpMenu() ;
+void EView_OpenFileMenu() ;
+void EView_OnFileMenu(int key) ;
+void EView_OpenEditMenu() ;
+void EView_OnEditMenu(int key) ;
+void EView_OpenHelpMenu() ;
+void EView_OnHelpMenu(int key) ;
+
+void EView_HandleHelpDialogActions(int key);
+void EView_HandleMenuActions(int ch);
+
+PopupMenuType EView_getCurrentPopupMenuType();
+PopupDialogType EView_getCurrentPopupDialogType();
 
 #endif
