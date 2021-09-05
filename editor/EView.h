@@ -39,8 +39,11 @@ void EView_OnEditMenu(int key) ;
 void EView_OpenHelpMenu() ;
 void EView_OnHelpMenu(int key) ;
 
-void EView_HandleHelpDialogActions(int key);
-void EView_HandleMenuActions(int ch);
+namespace upanui {
+  class KeyboardData;
+}
+void EView_HandleHelpDialogActions(const upanui::KeyboardData& key);
+void EView_HandleMenuActions(const upanui::KeyboardData& ch);
 
 PopupMenuType EView_getCurrentPopupMenuType();
 PopupDialogType EView_getCurrentPopupDialogType();

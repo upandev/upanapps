@@ -29,110 +29,111 @@ public:
   }
 
   void onEvent(upanui::KeyboardEvent& e) {
-    int ch = e.getData();
+    const auto& key = e.getData();
     int y;
 
     if (EView_getCurrentPopupMenuType() != PopupMenuType::NA_Menu) {
-      EView_HandleMenuActions(ch);
+      EView_HandleMenuActions(key);
     } else if (EView_getCurrentPopupDialogType() == PopupDialogType::HelpDialog) {
-      EView_HandleHelpDialogActions(ch);
-    } else if(CTRL(ch, 'f') || CTRL(ch, 'F')) {
+      EView_HandleHelpDialogActions(key);
+    } else if(key.isCtrlPressed() && (key.getCh() == 'f' || key.getCh() == 'F')) {
       EView_OpenFileMenu() ; // Ctrl+F - FILE MENU
       return;
-    } else if(CTRL(ch, 'e') || CTRL(ch, 'E')) {
+    } else if(key.isCtrlPressed() && (key.getCh() == 'e' || key.getCh() == 'E')) {
       EView_OpenEditMenu() ; // Ctrl+E - EDIT MENU
       return;
-    } else if(CTRL(ch, 'h') || CTRL(ch, 'H')) {
+    } else if(key.isCtrlPressed() && (key.getCh() == 'h' || key.getCh() == 'H')) {
       EView_OpenHelpMenu() ;
       return;
-    } else if(CTRL(ch, 'n') || CTRL(ch, 'N'))
+    } else if(key.isCtrlPressed() && (key.getCh() == 'n' || key.getCh() == 'N'))
     {
       EView_OnFileMenu(1) ; // Ctrl+N - New
     }
-    else if(CTRL(ch, 'o') || CTRL(ch, 'O'))
+    else if(key.isCtrlPressed() && (key.getCh() == 'o' || key.getCh() == 'O'))
     {
       EView_OnFileMenu(2) ; // Ctrl+O - Open
     }
-    else if(CTRL(ch, 's') || CTRL(ch, 'S'))
+    else if(key.isCtrlPressed() && (key.getCh() == 's' || key.getCh() == 'S'))
     {
       EView_OnFileMenu(3) ; // Ctrl+S - Save
     }
-    else if(CTRL(ch, 'a') || CTRL(ch, 'A'))
+    else if(key.isCtrlPressed() && (key.getCh() == 'a' || key.getCh() == 'A'))
     {
       EView_OnFileMenu(4) ; // Ctrl+A - Save as
     }
-    else if(CTRL(ch, 'x') || CTRL(ch, 'X'))
+    else if(key.isCtrlPressed() && (key.getCh() == 'x' || key.getCh() == 'X'))
     {
       EView_OnFileMenu(5) ; // ctrl+X - Exit
     }
-    else if(CTRL(ch, 'd') || CTRL(ch, 'D'))
+    else if(key.isCtrlPressed() && (key.getCh() == 'd' || key.getCh() == 'D'))
     {
       EView_OnEditMenu(1) ; // Ctrl+D - Delete line
     }
-    else if(CTRL(ch, 'r') || CTRL(ch, 'R'))
+    else if(key.isCtrlPressed() && (key.getCh() == 'r' || key.getCh() == 'R'))
     {
       EView_OnEditMenu(2) ; // Ctrl+R - Delete word
     }
-    else if(CTRL(ch, 'k') || CTRL(ch, 'K'))
+    else if(key.isCtrlPressed() && (key.getCh() == 'k' || key.getCh() == 'K'))
     {
       EView_OnEditMenu(3) ; // Ctrl+K - Insert line
     }
-    else if(CTRL(ch, 'w') || CTRL(ch, 'W'))
+    else if(key.isCtrlPressed() && (key.getCh() == 'w' || key.getCh() == 'W'))
     {
       EView_OnEditMenu(4) ; // Ctrl+W - Insert word
     }
-    else if(CTRL(ch, 'p') || CTRL(ch, 'P'))
+    else if(key.isCtrlPressed() && (key.getCh() == 'p' || key.getCh() == 'P'))
     {
       //	options_menu();//Ctrl+P - Options Men
     }
-    else if(ch == Keyboard_KEY_HOME)
+    else if(key.getCh() == Keyboard_KEY_HOME)
     {
       Edit_Home() ;
     }
-    else if(ch == Keyboard_KEY_END)
+    else if(key.getCh() == Keyboard_KEY_END)
     {
       Edit_End() ;
     }
-    else if(ch == Keyboard_KEY_UP)
+    else if(key.getCh() == Keyboard_KEY_UP)
     {
       Edit_MoveUp() ;
     }
-    else if(ch == Keyboard_KEY_DOWN)
+    else if(key.getCh() == Keyboard_KEY_DOWN)
     {
       Edit_MoveDown() ;
     }
-    else if(ch == Keyboard_KEY_LEFT)
+    else if(key.getCh() == Keyboard_KEY_LEFT)
     {
       Edit_MoveLeft() ;
     }
-    else if(ch == Keyboard_KEY_RIGHT)
+    else if(key.getCh() == Keyboard_KEY_RIGHT)
     {
       Edit_MoveRight() ;
     }
-    else if(ch == Keyboard_KEY_DEL)
+    else if(key.getCh() == Keyboard_KEY_DEL)
     {
       Edit_DeleteCh() ;
       Edit_bSave = false ;
       Edit_DisplayLine() ;
     }
-    else if(ch == Keyboard_BACKSPACE)
+    else if(key.getCh() == Keyboard_BACKSPACE)
     {
       Edit_BakSpace() ;
       Edit_bSave = false ;
       Edit_DisplayLine() ;
     }
-    else if(ch == Keyboard_KEY_PG_UP)
+    else if(key.getCh() == Keyboard_KEY_PG_UP)
     {
       Edit_PageUp() ;
     }
-    else if(ch == Keyboard_KEY_PG_DOWN)
+    else if(key.getCh() == Keyboard_KEY_PG_DOWN)
     {
       Edit_PageDown() ;
     }
     else
     {
-      if(toascii(ch) > 30 || ch == Keyboard_ENTER || ch == '\t')
+      if(toascii(key.getCh()) > 30 || key.getCh() == Keyboard_ENTER || key.getCh() == '\t')
       {
+        auto ch = key.getCh();
         if(ch == Keyboard_ENTER)
           ch = '\n' ;
 

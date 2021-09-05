@@ -126,18 +126,17 @@ void Action_DrawOkCancel(int pos)
 
 void Action_OkCancel()
 {
-	int ch ;
 	ok = 1 ;
 
 	MTerm_WinMove(pOkWin, 0, 0) ;
 	MTerm_SetWinAttr(pOkWin, ATTR_NOBLINK | ColorPalettes::CP16::FG_RED | ColorPalettes::CP16::BG_BLACK) ;
 	MTerm_WinRefresh(pOkWin) ;
 
-	ch = upanui::GraphicsContext::Instance().eventManager().getch();
+	auto key = upanui::GraphicsContext::Instance().eventManager().getCh();
 
-	while(ch != Keyboard_ENTER)
+	while(key.getCh() != Keyboard_ENTER)
 	{
-		if(ch == '\t' && ok == 1)
+	  if(key.getCh() == Keyboard_TAB && ok == 1)
 		{
 			MTerm_WinMove(pOkWin, 0, 0) ;
 			MTerm_SetWinAttr(pOkWin, ATTR_NOBLINK | ColorPalettes::CP16::FG_BLACK | ColorPalettes::CP16::BG_RED) ;
@@ -146,7 +145,7 @@ void Action_OkCancel()
 			MTerm_WinMove(pCancelWin, 0, 0) ;
 			MTerm_SetWinAttr(pCancelWin, ATTR_NOBLINK | ColorPalettes::CP16::FG_RED | ColorPalettes::CP16::BG_BLACK) ;
 		}
-		else if(ch == '\t' && ok == 0)
+	  else if(key.getCh() == Keyboard_TAB && ok == 0)
 		{
 			MTerm_WinMove(pCancelWin, 0, 0) ;
 			MTerm_SetWinAttr(pCancelWin, ATTR_NOBLINK | ColorPalettes::CP16::FG_BLACK | ColorPalettes::CP16::BG_RED) ;
@@ -158,7 +157,7 @@ void Action_OkCancel()
 
 		Action_RefershOkCancel() ;
 
-		ch = upanui::GraphicsContext::Instance().eventManager().getch();
+		key = upanui::GraphicsContext::Instance().eventManager().getCh();
 	}
 
 	MTerm_DestroyWindow(pOkWin) ;

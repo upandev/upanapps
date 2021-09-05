@@ -27,6 +27,7 @@
 # include <Edit.h>
 # include <EView.h>
 # include <GraphicsContext.h>
+#include <KeyboardData.h>
 
 static byte EView_backWinRows, EView_backWinCols, EView_editWinRows, EView_editWinCols ;
 static const int filem = 1, warn = 0, chance = 1;
@@ -86,7 +87,7 @@ static void EView_WarningBox(const char text[], int interact)
 	}
 	else
 	{
-	  upanui::GraphicsContext::Instance().eventManager().getch();
+	  upanui::GraphicsContext::Instance().eventManager().getCh();
 	}
 
 	MTerm_DestroyWindow(pWarnWin) ;
@@ -97,12 +98,12 @@ static void EView_WarningBox(const char text[], int interact)
 static void win_scan(MWindow* pMsgWin, char* tempfl) {
   int i = 0;
   while(true) {
-    int ch = upanui::GraphicsContext::Instance().eventManager().getch();
+    auto key = upanui::GraphicsContext::Instance().eventManager().getCh();
 
-    if (ch == Keyboard_ENTER) {
+    if (key.getCh() == Keyboard_ENTER) {
       tempfl[i] = '\0';
       return;
-    } else if(ch == Keyboard_BACKSPACE) {
+    } else if(key.getCh() == Keyboard_BACKSPACE) {
       int y, x ;
 
       MTerm_GetWinYX(pMsgWin, &y, &x) ;
@@ -111,9 +112,9 @@ static void win_scan(MWindow* pMsgWin, char* tempfl) {
       --i;
       tempfl[i] = '\0';
     } else {
-      tempfl[i] = ch;
+      tempfl[i] = key.getCh();
       ++i;
-      MTerm_WinPutChar(pMsgWin, ch) ;
+      MTerm_WinPutChar(pMsgWin, key.getCh()) ;
     }
 
     MTerm_WinRefresh(pMsgWin) ;
@@ -391,13 +392,13 @@ PopupDialogType EView_getCurrentPopupDialogType() {
   return _currentPopupDialogType;
 }
 
-void EView_HandleMenuActions(int ch) {
+void EView_HandleMenuActions(const upanui::KeyboardData& key) {
   int j = _currentMenuIndex;
 
   bool over = false;
   int res = -1;
 
-  switch(ch) {
+  switch(key.getCh()) {
     case Keyboard_KEY_UP:
       _currentMenuIndex = (_currentMenuIndex == 1) ? _currentDialogWindow->Rows - 2 : _currentMenuIndex - 1 ;
       break ;
@@ -440,8 +441,8 @@ void EView_HandleMenuActions(int ch) {
   }
 }
 
-void EView_HandleHelpDialogActions(int key) {
-  if (key != Keyboard_ENTER) {
+void EView_HandleHelpDialogActions(const upanui::KeyboardData& key) {
+  if (key.getCh() != Keyboard_ENTER) {
     return;
   }
 
