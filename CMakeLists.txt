@@ -79,6 +79,7 @@ include_directories(${UPANLIB_SOURCE_DIR}/libupanui/events)
 include_directories(${UPANLIB_SOURCE_DIR}/libupanui/text/)
 include_directories(${UPANLIB_SOURCE_DIR}/libupanui/text/default)
 include_directories(${UPANLIB_SOURCE_DIR}/libupanui/text/usfn)
+include_directories(${UPANLIB_SOURCE_DIR}/libupanui/interop/includes)
 
 link_directories(${UPANLIB_OUT_DIR})
 link_directories(${OUTPUT_DIR})
