@@ -74,6 +74,8 @@ include_directories(${PROJECT_SOURCE_DIR}/libmterm/include)
 include_directories(${UPANLIB_SOURCE_DIR}/libcxxrt)
 
 include_directories(${UPANLIB_SOURCE_DIR}/libupanui)
+include_directories(${UPANLIB_SOURCE_DIR}/libupanui/frame)
+include_directories(${UPANLIB_SOURCE_DIR}/libupanui/uiobject)
 include_directories(${UPANLIB_SOURCE_DIR}/libupanui/canvas)
 include_directories(${UPANLIB_SOURCE_DIR}/libupanui/events)
 include_directories(${UPANLIB_SOURCE_DIR}/libupanui/text/)
