@@ -25,7 +25,7 @@
 # include <cdisplay.h>
 # include <stdlib.h>
 # include <ColorPalettes.h>
-#include <ConsoleCanvas.h>
+# include <ConsoleCanvas.h>
 
 #define WIN_SIZE(Win)		( Win->Rows * Win->Cols )
 
