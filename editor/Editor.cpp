@@ -29,10 +29,7 @@
 
 class EditorKeyboardEventHandler : public upanui::KeyboardEventHandler {
 public:
-  EditorKeyboardEventHandler(upanui::UIObject& uiObject) : upanui::KeyboardEventHandler(uiObject) {
-  }
-
-  void onEvent(upanui::KeyboardEvent& e) {
+  void onEvent(upanui::UIObject& uiObject, const upanui::KeyboardEvent& e) {
     const auto& key = e.getData();
     int y;
 
@@ -169,10 +166,9 @@ int main(int argc, char** argv)
 	MTerm_WinMove(Edit_pEditWin, Edit_yMin, Edit_xMin) ;
 	EView_Refresh() ;
 
-	auto& eventManager = upanui::GraphicsContext::Instance().initEventManager();
-	EditorKeyboardEventHandler keyboardEventHandler(*consoleCanvas);
-	upanui::GraphicsContext::Instance().setFocus(consoleCanvas);
-	eventManager.registerKeyboardEventHandler(keyboardEventHandler);
+	upanui::GraphicsContext::Instance().setFocus(*consoleCanvas);
+	EditorKeyboardEventHandler keyboardEventHandler;
+	consoleCanvas->addKeyboardEventHandler(keyboardEventHandler);
 
 	int y;
 
@@ -180,7 +176,7 @@ int main(int argc, char** argv)
 	EView_DisplayStatus() ;
 	MTerm_WinRefresh(Edit_pEditWin) ;
 
-	eventManager.startEventLoop();
+	upanui::GraphicsContext::Instance().eventManager().startEventLoop();
 
 	EView_Release() ;
 
