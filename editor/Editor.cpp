@@ -168,7 +168,7 @@ int main(int argc, char** argv)
 
 	upanui::GraphicsContext::Instance().setFocus(*consoleCanvas);
 	EditorKeyboardEventHandler keyboardEventHandler;
-	consoleCanvas->addKeyboardEventHandler(keyboardEventHandler);
+	consoleCanvas->onKeyPress(keyboardEventHandler);
 
 	int y;
 
