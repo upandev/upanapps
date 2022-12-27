@@ -114,15 +114,15 @@ target_compile_options(mterm PRIVATE ${SO_COMPILE_FLAGS})
 
 add_custom_target(crt
   COMMAND make WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/crt
-  BYPRODUCTS ./crt/crt0.o ./crt/crti.o ./crt/crtn.o)
+  BYPRODUCTS ${PROJECT_SOURCE_DIR}/crt/crt0.o ${PROJECT_SOURCE_DIR}/crt/crti.o ${PROJECT_SOURCE_DIR}/crt/crtn.o)
 
 execute_process(COMMAND bash -c "${CMAKE_CXX_COMPILER} -print-file-name=crtbegin.o" OUTPUT_VARIABLE CRTBEGIN_OBJ)
 string(REPLACE "\n" "" CRTBEGIN_OBJ ${CRTBEGIN_OBJ})
 execute_process(COMMAND bash -c "${CMAKE_CXX_COMPILER} -print-file-name=crtend.o" OUTPUT_VARIABLE CRTEND_OBJ)
 string(REPLACE "\n" "" CRTEND_OBJ ${CRTEND_OBJ})
 
-set(CRTINIT_OBJ "./crt/crt0.o ./crt/crti.o ${CRTBEGIN_OBJ}")
-set(CRTFINI_OBJ "${CRTEND_OBJ} ./crt/crtn.o")
+set(CRTINIT_OBJ "${PROJECT_SOURCE_DIR}/crt/crt0.o ${PROJECT_SOURCE_DIR}/crt/crti.o ${CRTBEGIN_OBJ}")
+set(CRTFINI_OBJ "${CRTEND_OBJ} ${PROJECT_SOURCE_DIR}/crt/crtn.o")
 set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_CXX_COMPILER> ${CMAKE_CXX_FLAGS} ${CMAKE_EXE_LINKER_FLAGS} ${CRTINIT_OBJ} <OBJECTS> -o <TARGET> <LINK_LIBRARIES> ${CRTFINI_OBJ}")
 
 #NASM
