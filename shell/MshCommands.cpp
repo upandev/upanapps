@@ -340,12 +340,12 @@ void MshCommandShowFile::execute(const MshCommandExecutor& cmdExec) {
 }
 
 void MshCommandDate::execute(const MshCommandExecutor& cmdExec) {
-  RTCTime rtcTime ;
-  dtime(&rtcTime) ;
+  RTCDateTime rtcDateTime ;
+  dtime(&rtcDateTime) ;
 
-  printf("%d/%d/%d %d:%d:%d", rtcTime.bDayOfMonth, rtcTime.bMonth,
-         rtcTime.bCentury * 100 + rtcTime.bYear, rtcTime.bHour, rtcTime.bMinute,
-         rtcTime.bSecond) ;
+  printf("%d/%d/%d %d:%d:%d", rtcDateTime._dayOfMonth, rtcDateTime._month,
+         rtcDateTime._century * 100 + rtcDateTime._year, rtcDateTime._hour, rtcDateTime._minute,
+         rtcDateTime._second) ;
 }
 
 void MshCommandChangeDrive::execute(const MshCommandExecutor& cmdExec) {
