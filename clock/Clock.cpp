@@ -72,14 +72,23 @@ void Clock::PassThroughMouseHandler::onEvent(upanui::UIObject& uiObject, const u
   }
 }
 
-void Clock::start() {
+void Clock::run() {
+  try {
+    doRun();
+  } catch (const upan::exception &e) {
+    printf("App failed with error: %s", e.ErrorMsg().c_str());
+    exit(1);
+  }
+}
+
+void Clock::doRun() {
   auto &clockCanvas = upanui::UIObjectFactory::createRoundCanvas(_uiRoot, PADDING, PADDING, _csize, _csize);
   clockCanvas.borderThickness(BORDER_THICKNESS);
   clockCanvas.backgroundColor(0xFFFEF2);
   clockCanvas.borderColor(0x5A3828);
 
-  PassThroughMouseHandler mouseHandler;
-  clockCanvas.registerMouseEventHandler(mouseHandler);
+  auto mouseHandler = new PassThroughMouseHandler();
+  clockCanvas.registerMouseEventHandler(*mouseHandler);
 
   auto &secondHand = upanui::UIObjectFactory::createLine(clockCanvas, _cx, _cy, _cx + _secondSteps[0].x(),
                                                          _cy - _secondSteps[0].y(), 2);

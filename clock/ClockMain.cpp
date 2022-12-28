@@ -43,6 +43,7 @@ int main(int argc, char** argv) {
     printf("\nError: %s", e.ErrorMsg().c_str());
   }
   if (clock) {
+    clock->stop();
     delete clock;
   }
 	return 0 ;

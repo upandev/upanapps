@@ -26,13 +26,16 @@
 #include <UIObject.h>
 #include <UIRoot.h>
 #include <MouseEventHandler.h>
+#include <thread.h>
 
-class Clock {
+class Clock : public upan::thread {
 public:
   Clock(upanui::UIRoot&);
-  void start();
 
 private:
+  void run() override;
+  void doRun();
+
   void populateSteps(upanui::Point (&steps)[60], const int r);
 
   class PassThroughMouseHandler : public upanui::MouseEventHandler {
