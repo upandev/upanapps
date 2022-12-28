@@ -25,7 +25,7 @@
 # include <mosstd.h>
 # include <malloc.h>
 
-MshCommandExecutor::MshCommandExecutor(const upan::string& cmdLine) : _cmd(upan::option<MshCommand*>::empty()) {
+MshCommandExecutor::MshCommandExecutor(const upan::string& cmdLine) : _cmd(upan::option<MshCommand*>::empty()), _runInBG(false) {
   parse(cmdLine);
   _cmdName = _cmdLineTokens.empty() ? "" : _cmdLineTokens[0];
   auto it = Msh::Instance().getCommands().find(_cmdName);
@@ -67,6 +67,10 @@ void MshCommandExecutor::parse(const upan::string& cmdLine) {
         _params.push_back(token);
       }
     }
+  }
+  if (_params.size() > 0 && _params[_params.size() - 1] == "&") {
+    _runInBG = true;
+    _params.pop_back();
   }
 }
 
@@ -128,7 +132,7 @@ bool MshCommandExecutor::executeProcess() {
 	
 	if(pid < 0) {
 		return false ;
-	} else {
+	} else if (!_runInBG) {
 		waitpid(pid) ;
 	}
 	return true ;

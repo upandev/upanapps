@@ -58,4 +58,5 @@ private:
   upan::vector<upan::string> _cmdLineTokens;
   upan::vector<upan::string> _params;
   upan::set<upan::string> _options;
+  bool _runInBG;
 };
