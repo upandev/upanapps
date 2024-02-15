@@ -83,8 +83,9 @@ void MshCommandExecutor::expandCmdLine() {
         for(j = 0; token[j] != '\0' && !iswhitespace(token[j]) && token[j] != '/'; j++) ;
 
         const upan::string temp(token.c_str() + j);
-        const char* val = getenv(upan::string(token.c_str() + 1, j - 1).c_str());
-        token = val == NULL ? "" : val;
+        char val[256] = "\0";
+        int r = getenv(upan::string(token.c_str() + 1, j - 1).c_str(), val);
+        token = r ? "" : val;
         token += temp;
       }
     }

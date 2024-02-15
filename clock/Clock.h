@@ -26,7 +26,7 @@
 #include <UIObject.h>
 #include <UIRoot.h>
 #include <MouseEventHandler.h>
-#include <thread.h>
+#include <ithread.h>
 
 class Clock : public upan::thread {
 public:

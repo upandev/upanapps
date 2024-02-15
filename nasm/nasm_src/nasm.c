@@ -711,15 +711,15 @@ static void process_args(char *args)
 static void parse_cmdline(int argc, char **argv)
 {
     FILE *rfile;
-    char *envreal, *envcopy = NULL, *p;
+    char *envcopy = NULL, *p;
 
     *inname = *outname = *listname = '\0';
 
     /*
      * First, process the NASMENV environment variable.
      */
-    envreal = getenv("NASMENV");
-    if (envreal) {
+    char envreal[256] = "\0";
+    if (!getenv("NASMENV", envreal)) {
         envcopy = nasm_strdup(envreal);
         process_args(envcopy);
         nasm_free(envcopy);
