@@ -26,7 +26,11 @@ _start:
 	mov %rsp, %rbp
 
 	# Prepare signals, memory allocation, stdio and such.
-	call initialize_standard_library
+	#call initialize_standard_library
+  call getpid
+
+L1:
+  jmp L1
 
 	# Run the global constructors.
 	call _init
@@ -39,3 +43,20 @@ _start:
 	call exit
 .size _start, . - _start
 
+.section .dll, "ax", @progbits
+.align 16
+_resolve_dll:
+  pushq $3
+  pushq $2
+  pushq $1
+  pushq $601
+
+  syscall
+
+  add $48, %rsp
+L2:
+  jmp L2
+
+  jmp *%rax
+
+  ret
