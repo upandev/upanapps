@@ -20,12 +20,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/
  */
 # include <Msh.h>
-# include <mosstd.h>
 # include <stdio.h>
 # include <exception.h>
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   for(int i = 0; i < argc; ++i) {
     printf("\n%s", argv[i]);
   }

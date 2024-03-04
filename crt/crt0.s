@@ -25,8 +25,8 @@
 _start:
 	mov %rsp, %rbp
 
-  push %rdi
-  push %rsi
+	push %rdi
+	push %rsi
 
 	# Prepare signals, memory allocation, stdio and such.
 	call initialize_standard_library
@@ -34,8 +34,8 @@ _start:
   # Run the global constructors.
 	call _init
 
-  pop %rsi
-  pop %rdi
+	pop %rsi
+	pop %rdi
 	# Run main
 	call main
 
