@@ -27,6 +27,7 @@
 #include <Label.h>
 #include <ColorPalettes.h>
 #include <dtime.h>
+#include <GraphicsContext.h>
 
 const float Clock::X_CO[] = { 0.0, 0.10453, 0.20791, 0.30901, 0.40673, 0.5, 0.5878, 0.66913 };
 const float Clock::Y_CO[] = { 1.0, 0.99452, 0.97815, 0.95105, 0.91354, 0.86602, 0.80901, 0.74314 };
@@ -39,6 +40,7 @@ Clock::Clock(upanui::UIRoot& uiRoot) :
   populateSteps(_minuteSteps, r - 5);
   populateSteps(_hourSteps, r - 20);
   populateSteps(_labels, r + 3);
+  initLayout();
 }
 
 void Clock::populateSteps(upanui::Point (&steps)[60], const int r) {
@@ -72,16 +74,8 @@ void Clock::PassThroughMouseHandler::onEvent(upanui::UIObject& uiObject, const u
   }
 }
 
-void Clock::run() {
-  try {
-    doRun();
-  } catch (const upan::exception &e) {
-    printf("App failed with error: %s", e.ErrorMsg().c_str());
-    exit(1);
-  }
-}
-
-void Clock::doRun() {
+void Clock::initLayout() {
+  upanui::GraphicsContext::Transaction gcTransaction;
   auto &clockCanvas = upanui::UIObjectFactory::createRoundCanvas(_uiRoot, PADDING, PADDING, _csize, _csize);
   clockCanvas.borderThickness(BORDER_THICKNESS);
   clockCanvas.backgroundColor(0xFFFEF2);
@@ -90,17 +84,14 @@ void Clock::doRun() {
   auto mouseHandler = new PassThroughMouseHandler();
   clockCanvas.registerMouseEventHandler(*mouseHandler);
 
-  auto &secondHand = upanui::UIObjectFactory::createLine(clockCanvas, _cx, _cy, _cx + _secondSteps[0].x(),
-                                                         _cy - _secondSteps[0].y(), 2);
-  secondHand.backgroundColor(0x41394C);
+  _secondHand = &upanui::UIObjectFactory::createLine(clockCanvas, _cx, _cy, _cx + _secondSteps[0].x(), _cy - _secondSteps[0].y(), 2);
+  _secondHand->backgroundColor(0x41394C);
 
-  auto &minuteHand = upanui::UIObjectFactory::createLine(clockCanvas, _cx, _cy, _cx + _minuteSteps[0].x(),
-                                                         _cy - _minuteSteps[0].y(), 3);
-  minuteHand.backgroundColor(0x524C4C);
+  _minuteHand = &upanui::UIObjectFactory::createLine(clockCanvas, _cx, _cy, _cx + _minuteSteps[0].x(), _cy - _minuteSteps[0].y(), 3);
+  _minuteHand->backgroundColor(0x524C4C);
 
-  auto &hourHand = upanui::UIObjectFactory::createLine(clockCanvas, _cx, _cy, _cx + _hourSteps[0].x(),
-                                                       _cy - _hourSteps[0].y(), 4);
-  hourHand.backgroundColor(0x4B4B4C);
+  _hourHand = &upanui::UIObjectFactory::createLine(clockCanvas, _cx, _cy, _cx + _hourSteps[0].x(), _cy - _hourSteps[0].y(), 4);
+  _hourHand->backgroundColor(0x4B4B4C);
 
   auto &centerCircle = upanui::UIObjectFactory::createRoundCanvas(clockCanvas, _cx - 8, _cy - 8, 16, 16);
   centerCircle.backgroundColor(0xFADDBD);
@@ -127,17 +118,24 @@ void Clock::doRun() {
     label.backgroundColor(0);
     label.backgroundColorAlpha(0);
   }
+}
 
-  while (true) {
-    RTCDateTime dateTime;
-    dtime(&dateTime);
+void Clock::run() {
+  try {
+    while (true) {
+      RTCDateTime dateTime;
+      dtime(&dateTime);
 
-    secondHand.updateXY(_cx, _cy, _cx + _secondSteps[dateTime._second].x(), _cy - _secondSteps[dateTime._second].y());
-    minuteHand.updateXY(_cx, _cy, _cx + _minuteSteps[dateTime._minute].x(), _cy - _minuteSteps[dateTime._minute].y());
+      _secondHand->updateXY(_cx, _cy, _cx + _secondSteps[dateTime._second].x(), _cy - _secondSteps[dateTime._second].y());
+      _minuteHand->updateXY(_cx, _cy, _cx + _minuteSteps[dateTime._minute].x(), _cy - _minuteSteps[dateTime._minute].y());
 
-    const int h = (dateTime._hour * 5 + int(dateTime._minute * _htomFactor)) % 60;
-    hourHand.updateXY(_cx, _cy, _cx + _hourSteps[h].x(), _cy - _hourSteps[h].y());
+      const int h = (dateTime._hour * 5 + int(dateTime._minute * _htomFactor)) % 60;
+      _hourHand->updateXY(_cx, _cy, _cx + _hourSteps[h].x(), _cy - _hourSteps[h].y());
 
-    sleepms(1000);
+      sleepms(1000);
+    }
+  } catch (const upan::exception &e) {
+    printf("App failed with error: %s", e.ErrorMsg().c_str());
+    exit(1);
   }
 }

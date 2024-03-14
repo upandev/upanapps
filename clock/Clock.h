@@ -27,6 +27,7 @@
 #include <UIRoot.h>
 #include <MouseEventHandler.h>
 #include <ithread.h>
+#include <Line.h>
 
 class Clock : public upan::thread {
 public:
@@ -34,7 +35,7 @@ public:
 
 private:
   void run() override;
-  void doRun();
+  void initLayout();
 
   void populateSteps(upanui::Point (&steps)[60], const int r);
 
@@ -53,6 +54,9 @@ private:
   upanui::Point _minuteSteps[60];
   upanui::Point _hourSteps[60];
   upanui::Point _labels[60];
+  upanui::Line* _secondHand;
+  upanui::Line* _minuteHand;
+  upanui::Line* _hourHand;
 
 private:
   static const int BORDER_THICKNESS = 5;
