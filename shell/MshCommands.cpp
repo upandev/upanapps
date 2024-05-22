@@ -142,46 +142,46 @@ void MshCommandDeleteFile::execute(const MshCommandExecutor& cmdExec) {
 }
 
 void MshCommandListDir::execute(const MshCommandExecutor& cmdExec) {
-  FS_Node *pDirList;
-  int iListSize;
+  int size;
+  struct stat_ex* dirList;
 
   if (!cmdExec.params().empty()) {
     bool bDisplayParentDirName = cmdExec.params().size() > 1;
 
     for (const auto& param : cmdExec.params()) {
-      if (get_dir_content(param.c_str(), &pDirList, &iListSize) < 0) {
+      if (get_dir_content(param.c_str(), &dirList, &size) < 0) {
         printerr("%s : No Such Directory/File", param.c_str());
       } else {
         if (bDisplayParentDirName)
           printf("\n\n %s :", param.c_str());
-        showDirContent(cmdExec, pDirList, iListSize);
-        free(pDirList);
+        showDirContent(cmdExec, dirList, size);
+        free(dirList);
       }
     }
   } else {
-    if (get_dir_content("", &pDirList, &iListSize) < 0) {
+    if (get_dir_content("", &dirList, &size) < 0) {
       puts("\nFailed to Get Directory Content");
     } else {
-      showDirContent(cmdExec, pDirList, iListSize);
-      free(pDirList);
+      showDirContent(cmdExec, dirList, size);
+      free(dirList);
     }
   }
 }
 
-void MshCommandListDir::showDirContent(const MshCommandExecutor& cmdExec, const FS_Node* pDirList, int iListSize) {
+void MshCommandListDir::showDirContent(const MshCommandExecutor& cmdExec, const struct stat_ex* dirList, int size) {
   if(cmdExec.isOptPresent("-l")) {
     char rwx[12] ;
     // Attr, User, Size, Create Time, Modify Time, Access Time, Name
-    for(int i = 0; i < iListSize; i++) {
-      format_dir_attr(pDirList[i]._attribute, rwx) ;
-      printf("\n%-15s%-15d%s", rwx, pDirList[i]._size, pDirList[i]._name) ;
+    for(int i = 0; i < size; i++) {
+      format_dir_attr(dirList[i]._stat.st_mode, rwx) ;
+      printf("\n%-15s%-15d%s", rwx, dirList[i]._stat.st_size, dirList[i]._name) ;
     }
   } else {
-    for(int i = 0; i < iListSize; i++)
+    for(int i = 0; i < size; i++)
     {
       if(!(i % 3) && i != 0)
         putc('\n', stdout) ;
-      printf("%-20s", pDirList[i]._name) ;
+      printf("%-20s", dirList[i]._name) ;
     }
   }
 }
@@ -194,10 +194,9 @@ void MshCommandChangeDir::execute(const MshCommandExecutor& cmdExec) {
 }
 
 void MshCommandPresentWorkingDir::execute(const MshCommandExecutor& cmdExec) {
-  char* szPWD ;
-  getpwd(&szPWD) ;
-  printf("%s", szPWD) ;
-  free(szPWD) ;
+  char pwd[256];
+  getenv("PWD", pwd);
+  printf("%s", pwd) ;
 }
 
 void MshCommandCopyFile::execute(const MshCommandExecutor& cmdExec) {

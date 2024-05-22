@@ -108,7 +108,7 @@ public:
   }
   virtual void execute(const MshCommandExecutor&) override;
 private:
-  void showDirContent(const MshCommandExecutor& cmdExec, const FS_Node* pDirList, int iListSize);
+  void showDirContent(const MshCommandExecutor& cmdExec, const struct stat_ex* dirList, int size);
 };
 
 class MshCommandChangeDir : public MshCommand {

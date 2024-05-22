@@ -63,10 +63,9 @@ Msh::Msh() : _prompt("msh:"), _cmdLinePos(0) {
 }
 
 void Msh::displayPrompt() {
-  char* szPWD ;
-  getpwd(&szPWD) ;
-  printf("\n%s%s> ", _prompt.c_str(), szPWD) ;
-  free(szPWD) ;
+  char pwd[256] = "";
+  getenv("PWD", pwd);
+  printf("\n%s%s> ", _prompt.c_str(), pwd) ;
 }
 
 void Msh::clearCommandLine() {
