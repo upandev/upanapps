@@ -22,12 +22,12 @@
 
 #pragma once
 
-#include <Point.h>
 #include <UIObject.h>
 #include <UIRoot.h>
 #include <MouseEventHandler.h>
 #include <ithread.h>
 #include <Line.h>
+#include <UIPosition.h>
 
 class Clock : public upan::thread {
 public:
@@ -37,7 +37,7 @@ private:
   void run() override;
   void initLayout();
 
-  void populateSteps(upanui::Point (&steps)[60], const int r);
+  void populateSteps(upanui::UIPosition (&steps)[60], const int r);
 
   class PassThroughMouseHandler : public upanui::MouseEventHandler {
   public:
@@ -50,10 +50,10 @@ private:
   const float _htomFactor;
   const int _cx;
   const int _cy;
-  upanui::Point _secondSteps[60];
-  upanui::Point _minuteSteps[60];
-  upanui::Point _hourSteps[60];
-  upanui::Point _labels[60];
+  upanui::UIPosition _secondSteps[60];
+  upanui::UIPosition _minuteSteps[60];
+  upanui::UIPosition _hourSteps[60];
+  upanui::UIPosition _labels[60];
   upanui::Line* _secondHand;
   upanui::Line* _minuteHand;
   upanui::Line* _hourHand;

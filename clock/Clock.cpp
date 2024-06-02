@@ -23,7 +23,6 @@
 #include <Clock.h>
 #include <UIObjectFactory.h>
 #include <RoundCanvas.h>
-#include <Line.h>
 #include <Label.h>
 #include <ColorPalettes.h>
 #include <dtime.h>
@@ -43,26 +42,26 @@ Clock::Clock(upanui::UIRoot& uiRoot) :
   initLayout();
 }
 
-void Clock::populateSteps(upanui::Point (&steps)[60], const int r) {
+void Clock::populateSteps(upanui::UIPosition (&steps)[60], const int r) {
   if (r < 0) {
     throw upan::exception(XLOC, "csize (%u) is smaller than minimum length", _csize);
   }
 
   for(int i = 0; i < X_Y_CO_SIZE; ++i) {
-    steps[i] = upanui::Point(roundtoi(X_CO[i] * r), roundtoi(Y_CO[i] * r));
+    steps[i] = upanui::UIPosition(roundtoi(X_CO[i] * r), roundtoi(Y_CO[i] * r));
 
     if (i == 0) {
-      steps[15] = upanui::Point(steps[i].y(), steps[i].x());
-      steps[30] = upanui::Point(steps[i].x(), -steps[i].y());
-      steps[45] = upanui::Point(-steps[i + 15].x(), steps[i + 15].y());
+      steps[15] = upanui::UIPosition(steps[i].y(), steps[i].x());
+      steps[30] = upanui::UIPosition(steps[i].x(), -steps[i].y());
+      steps[45] = upanui::UIPosition(-steps[i + 15].x(), steps[i + 15].y());
     } else {
-      steps[15 - i] = upanui::Point(steps[i].y(), steps[i].x());
-      steps[15 + i] = upanui::Point(steps[15 - i].x(), -steps[15 - i].y());
-      steps[45 - i] = upanui::Point(-steps[15 - i].x(), -steps[15 - i].y());
-      steps[45 + i] = upanui::Point(-steps[15 - i].x(), steps[15 - i].y());
-      steps[30 - i] = upanui::Point(steps[i].x(), -steps[i].y());
-      steps[30 + i] = upanui::Point(-steps[i].x(), -steps[i].y());
-      steps[60 - i] = upanui::Point(-steps[i].x(), steps[i].y());
+      steps[15 - i] = upanui::UIPosition(steps[i].y(), steps[i].x());
+      steps[15 + i] = upanui::UIPosition(steps[15 - i].x(), -steps[15 - i].y());
+      steps[45 - i] = upanui::UIPosition(-steps[15 - i].x(), -steps[15 - i].y());
+      steps[45 + i] = upanui::UIPosition(-steps[15 - i].x(), steps[15 - i].y());
+      steps[30 - i] = upanui::UIPosition(steps[i].x(), -steps[i].y());
+      steps[30 + i] = upanui::UIPosition(-steps[i].x(), -steps[i].y());
+      steps[60 - i] = upanui::UIPosition(-steps[i].x(), steps[i].y());
     }
   }
 }
