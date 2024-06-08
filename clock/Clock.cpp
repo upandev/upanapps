@@ -75,7 +75,7 @@ void Clock::PassThroughMouseHandler::onEvent(upanui::UIObject& uiObject, const u
 
 void Clock::initLayout() {
   upanui::GraphicsContext::Transaction gcTransaction;
-  auto &clockCanvas = upanui::UIObjectFactory::createRoundCanvas(_uiRoot, PADDING, PADDING, _csize, _csize);
+  auto &clockCanvas = upanui::UIObjectFactory::createRoundCanvas(_uiRoot, PADDING, PADDING, _csize, _csize, upanui::HorizontalPlacementType::ABSOLUTE);
   clockCanvas.borderThickness(BORDER_THICKNESS);
   clockCanvas.backgroundColor(0xFFFEF2);
   clockCanvas.borderColor(0x5A3828);
@@ -83,16 +83,16 @@ void Clock::initLayout() {
   auto mouseHandler = new PassThroughMouseHandler();
   clockCanvas.registerMouseEventHandler(*mouseHandler);
 
-  _secondHand = &upanui::UIObjectFactory::createLine(clockCanvas, _cx, _cy, _cx + _secondSteps[0].x(), _cy - _secondSteps[0].y(), 2);
+  _secondHand = &upanui::UIObjectFactory::createLine(clockCanvas, _cx, _cy, _cx + _secondSteps[0].x(), _cy - _secondSteps[0].y(), 2, upanui::HorizontalPlacementType::ABSOLUTE);
   _secondHand->backgroundColor(0x41394C);
 
-  _minuteHand = &upanui::UIObjectFactory::createLine(clockCanvas, _cx, _cy, _cx + _minuteSteps[0].x(), _cy - _minuteSteps[0].y(), 3);
+  _minuteHand = &upanui::UIObjectFactory::createLine(clockCanvas, _cx, _cy, _cx + _minuteSteps[0].x(), _cy - _minuteSteps[0].y(), 3, upanui::HorizontalPlacementType::ABSOLUTE);
   _minuteHand->backgroundColor(0x524C4C);
 
-  _hourHand = &upanui::UIObjectFactory::createLine(clockCanvas, _cx, _cy, _cx + _hourSteps[0].x(), _cy - _hourSteps[0].y(), 4);
+  _hourHand = &upanui::UIObjectFactory::createLine(clockCanvas, _cx, _cy, _cx + _hourSteps[0].x(), _cy - _hourSteps[0].y(), 4, upanui::HorizontalPlacementType::ABSOLUTE);
   _hourHand->backgroundColor(0x4B4B4C);
 
-  auto &centerCircle = upanui::UIObjectFactory::createRoundCanvas(clockCanvas, _cx - 8, _cy - 8, 16, 16);
+  auto &centerCircle = upanui::UIObjectFactory::createRoundCanvas(clockCanvas, _cx - 8, _cy - 8, 16, 16, upanui::HorizontalPlacementType::ABSOLUTE);
   centerCircle.backgroundColor(0xFADDBD);
 
   //VGA font --> 1 character is 8 width, 16 height with font size 16
@@ -113,7 +113,7 @@ void Clock::initLayout() {
                                                        buf, fgColor,
                                                        upanui::usfn::PreloadedFonts::VGA16,
                                                        upanui::usfn::FAMILY_MONOSPACE, upanui::usfn::STYLE_REGULAR,
-                                                       labelSize);
+                                                       labelSize, upanui::HorizontalPlacementType::ABSOLUTE);
     label.backgroundColor(0);
     label.backgroundColorAlpha(0);
   }
