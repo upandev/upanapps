@@ -69,7 +69,7 @@ void Clock::populateSteps(upanui::UIPosition (&steps)[60], const int r) {
 void Clock::PassThroughMouseHandler::onEvent(upanui::UIObject& uiObject, const upanui::MouseEvent& event) {
   const upanui::MouseData &data = event.getData();
   if (data.leftButtonState() == upanui::MouseData::HOLD) {
-    uiObject.parent().xy(uiObject.parent().x() + data.deltaX(), uiObject.parent().y() - data.deltaY());
+    uiObject.parent().xy(uiObject.parent().x() + data.deltaX(), uiObject.parent().y() + data.deltaY());
   }
 }
 
