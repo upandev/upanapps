@@ -120,6 +120,8 @@ void Clock::initLayout() {
                                                        upanui::usfn::PreloadedFonts::VGA16,
                                                        upanui::usfn::FAMILY_MONOSPACE, upanui::usfn::STYLE_REGULAR,
                                                        labelSize,
+                                                       upanui::Label::HorizontalTextAlignment::LEFT,
+                                                       upanui::Label::VerticalTextAlignment::TOP,
                                                        upanui::HorizontalPlacementType::ABSOLUTE,
                                                        upanui::VerticalPlacementType::ABSOLUTE);
     label.backgroundColor(0);

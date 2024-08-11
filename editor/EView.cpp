@@ -534,7 +534,7 @@ void EView_OnFileMenu(int key) {
 		EView_CheckSave() ;
 		Edit_ClearData(Edit_headNode) ;
 
-		clrscr() ;
+		//clrscr() ;
 		exit(0) ;
 		break ;
 
