@@ -19,19 +19,18 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/
  */
-# include <kb.h>
 # include <string.h>
 # include <stdio.h>
-# include <malloc.h>
 # include <fs.h>
-# include <cdisplay.h>
-# include <mosstd.h>
 # include <Msh.h>
 # include <MshCommandExecutor.h>
 # include <MshCommands.h>
 # include <GraphicsContext.h>
+# include <UIObjectFactory.h>
+# include <VerticalScroller.h>
+# include <IconButton.h>
 
-Msh::Msh() : _prompt("msh:"), _cmdLinePos(0) {
+Msh::Msh() : PROMPT_BASE("msh:"), _terminal(nullptr) {
   auto add_cmd = [&](MshCommand* cmd) {
     auto r = _commands.insert(CmdMap::value_type(cmd->name(), cmd));
     if (!r.second) {
@@ -60,84 +59,88 @@ Msh::Msh() : _prompt("msh:"), _cmdLinePos(0) {
   add_cmd(new MshCommandHelp());
   add_cmd(new MshCommandGetProcessDetails());
   add_cmd(new MshCommandExportEvnVar());
+
+  updatePrompt();
 }
 
-void Msh::displayPrompt() {
+void Msh::updatePrompt() {
   char pwd[256] = "";
   getenv("PWD", pwd);
-  printf("\n%s%s> ", _prompt.c_str(), pwd) ;
+  _prompt = PROMPT_BASE + pwd;
 }
 
-void Msh::clearCommandLine() {
-	memset(_cmdLine, 0, COMMAND_LINE_SIZE) ;
-}
-
-void Msh::processCommandLine() {
-  _cmdLine[_cmdLinePos] = '\0';
-  _cmdLinePos = 0;
-  MshCommandExecutor cmdExec(_cmdLine);
+void Msh::execute(const upan::string& cmdLine) {
+  MshCommandExecutor cmdExec(cmdLine);
   cmdExec.execute();
-	clearCommandLine();
+  updatePrompt();
+  if (_terminal) {
+    _terminal->setPrompt(_prompt);
+  }
 }
 
-[[noreturn]] void Msh::start() {
+void Msh::printf(const char* __restrict fmsg, ...) {
+  va_list arg;
+
+  va_start(arg, fmsg);
+
+  const int BSIZE = 1024;
+  char buf[BSIZE];
+
+  vsnprintf(buf, BSIZE, fmsg, arg);
+
+  Msh::Instance()._terminal->insertCommandOutput(buf);
+
+  va_end(arg);
+}
+
+class PassThroughMouseHandler : public upanui::MouseEventHandler {
+public:
+  void onEvent(upanui::UIObject& uiObject, const upanui::MouseEvent& event) override {
+    const upanui::MouseData& data = event.getData();
+    if (data.leftButtonState() == upanui::MouseData::HOLD) {
+      uiObject.parent().xy(uiObject.parent().x() + data.deltaX(), uiObject.parent().y() + data.deltaY());
+    }
+  }
+};
+
+class CloseButtonMouseHandler : public upanui::MouseEventHandler {
+public:
+  void onEvent(upanui::UIObject& uiObject, const upanui::MouseEvent& event) override {
+    const upanui::MouseData& data = event.getData();
+    if (data.leftButtonState() == upanui::MouseData::RELEASED) {
+      exit(0);
+    }
+  }
+};
+
+void Msh::start() {
   upanui::GraphicsContext::Init();
-  upanui::GraphicsContext::Instance().setGuiBase(true);
-  upanui::TerminalConsole::Create();
+  auto& gc = upanui::GraphicsContext::Instance();
 
-	upanui::TerminalConsole::Instance().puts("\n\n Welcome to Mos Shell");
+  const int appWidth = 600;
+  const int mainHeight = 500;
+  const int menuBarHeight = 30;
 
-  displayPrompt() ;
+  auto& uiRoot = gc.initUIRoot(100, 100, appWidth, mainHeight + menuBarHeight, true);
+  uiRoot.setResizable(true, true);
 
-	while(true) {
-	  int ch = getchar();
+  auto& uiMenuBar = upanui::UIObjectFactory::createRectangleCanvas(uiRoot, 0, 0, appWidth, menuBarHeight, upanui::HorizontalPlacementType::STRETCHED, upanui::VerticalPlacementType::TOP_FIXED);
+  uiMenuBar.backgroundColor(0xA59E9D);
 
-		switch(ch)
-		{	
-			case Keyboard_LEFT_ALT:
-			case Keyboard_LEFT_CTRL:
-			case Keyboard_F1:
-			case Keyboard_F2:
-			case Keyboard_F3:
-			case Keyboard_F4:
-			case Keyboard_F5:
-			case Keyboard_F6:
-			case Keyboard_F7:
-			case Keyboard_F8:
-			case Keyboard_F9:
-			case Keyboard_F10:
-				break ;
-				
-			case Keyboard_CAPS_LOCK:
-				break ;
+  auto& closeBt = upanui::UIObjectFactory::createIconButton(uiMenuBar, upanui::PngImageResource::CLOSE, appWidth - menuBarHeight, 0, menuBarHeight, menuBarHeight, upanui::HorizontalPlacementType::RIGHT_FIXED, upanui::VerticalPlacementType::TOP_FIXED);
 
-			case Keyboard_BACKSPACE:
-				if(_cmdLinePos > 0)	{
-					_cmdLinePos-- ;
-					int x = _cmdLine[_cmdLinePos] == '\t' ? 4 : 1 ;
-					upanui::TerminalConsole::Instance().moveCursor(-x);
-					upanui::TerminalConsole::Instance().clearLine(upanui::ConsoleBuffer::START_CURSOR_POS);
-				}
-				break ;
-				
-			case Keyboard_LEFT_SHIFT:
-			case Keyboard_RIGHT_SHIFT:
-				break ;
-				
-			case Keyboard_ESC:
-				break ;
+  const int scrollBarWidth = 20;
+  auto& vScroller = upanui::UIObjectFactory::createVerticalScroller(uiRoot, 0, menuBarHeight, appWidth, mainHeight, scrollBarWidth, upanui::HorizontalPlacementType::STRETCHED, upanui::VerticalPlacementType::STRETCHED);
 
-			case Keyboard_ENTER:
-			  upanui::TerminalConsole::Instance().putc('\n') ;
-        processCommandLine() ;
-				displayPrompt();
-				break ;
+  _terminal = &upanui::UIObjectFactory::createTerminal(vScroller, 0, 0, appWidth - scrollBarWidth, mainHeight, _prompt, *this, upanui::HorizontalPlacementType::STRETCHED, upanui::VerticalPlacementType::STRETCHED);
 
-			default:
-				if(_cmdLinePos < COMMAND_LINE_SIZE) {
-				  upanui::TerminalConsole::Instance().putc(ch) ;
-          _cmdLine[_cmdLinePos++] = ch ;
-				}
-		}
-	}
+  PassThroughMouseHandler passThroughMouseHandler;
+  uiMenuBar.registerMouseEventHandler(passThroughMouseHandler);
+
+  CloseButtonMouseHandler closeButtonMouseHandler;
+  closeBt.registerMouseEventHandler(closeButtonMouseHandler);
+
+  gc.eventManager().startEventLoop();
+
+  exit(0);
 }

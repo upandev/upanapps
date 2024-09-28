@@ -23,13 +23,11 @@
 
 #include <ustring.h>
 #include <map.h>
-#include <TerminalConsole.h>
-
-#define COMMAND_LINE_SIZE 70
+#include <Terminal.h>
 
 class MshCommand;
 
-class Msh {
+class Msh : public upanui::Terminal::CommandExecutor {
 private:
   Msh();
 
@@ -39,7 +37,7 @@ public:
     return msh;
   }
 
-  [[noreturn]] void start();
+  void start();
 
   typedef upan::map<upan::string, MshCommand*> CmdMap;
 
@@ -47,14 +45,20 @@ public:
     return _commands;
   }
 
-private:
-  void displayPrompt();
-  void clearCommandLine();
-  void processCommandLine();
+  void printf(const char * __restrict fmsg, ...);
+  void clearScreen() {
+    _terminal->clear();
+  }
+
+protected:
+  void execute(const upan::string& cmdLine) override;
 
 private:
-  const upan::string _prompt;
-  uint32_t _cmdLinePos;
-  char _cmdLine[COMMAND_LINE_SIZE];
+  void updatePrompt();
+
+private:
+  const upan::string PROMPT_BASE;
+  upan::string _prompt;
   CmdMap _commands;
+  upanui::Terminal* _terminal;
 };

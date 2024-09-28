@@ -49,9 +49,7 @@ public:
     return _maxParamCount;
   }
 
-  void printUsage() {
-    printf("Usage: %s %s\n", _name.c_str(), _usage.c_str()) ;
-  }
+  void printUsage();
 
 private:
   const upan::string _name;
