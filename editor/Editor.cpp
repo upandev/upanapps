@@ -166,7 +166,6 @@ int main(int argc, char** argv)
 	MTerm_WinMove(Edit_pEditWin, Edit_yMin, Edit_xMin) ;
 	EView_Refresh() ;
 
-	upanui::GraphicsContext::Instance().setFocus(*consoleCanvas);
 	EditorKeyboardEventHandler keyboardEventHandler;
 	consoleCanvas->onKeyPress(keyboardEventHandler);
 

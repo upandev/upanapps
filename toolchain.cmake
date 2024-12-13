@@ -39,7 +39,7 @@ set(SO_COMPILE_FLAGS -shared -fPIC)
 set(SO_LD_FLAGS " -Wl,-shared -Wl,-fPIC")
 
 set(CMAKE_CXX_FLAGS " -O0 -Wall -ffreestanding -nodefaultlibs -nostdlib -nostartfiles -nostdinc -std=c++11 -nostdinc++ -fno-threadsafe-statics -fpermissive ${EXCEPTION_SUP}")
-set(COMMON_COMPILE_FLAGS " -O0 -Wall -std=c11 -nostdlib -nodefaultlibs -ffreestanding -nostartfiles -D__GCC__")
+set(COMMON_COMPILE_FLAGS " -std=c11 -O0 -Wall -ffreestanding -nodefaultlibs -nostdlib -nostartfiles -nostdinc -D__GCC__")
 set(CMAKE_C_FLAGS ${COMMON_COMPILE_FLAGS})
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_COMPILE_FLAGS}")
 set(CMAKE_SHARED_LINKER_FLAGS "${COMMON_COMPILE_FLAGS} ${SO_LD_FLAGS}")

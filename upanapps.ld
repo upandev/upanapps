@@ -109,6 +109,16 @@ SECTIONS
     *(.rela.plt*)
   }
 
+  .tdata : ALIGN(8)
+  {
+    *(.tdata*)
+  }
+
+  .tbss : ALIGN(8)
+  {
+    *(.tbss*)
+  }
+
   .debug_info  : { *(.debug_info*) }
   .debug_abbrev  : { *(.debug_abbrev*) }
   .debug_aranges  : { *(.debug_aranges*) }

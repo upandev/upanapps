@@ -139,6 +139,24 @@ void writer_thread(void* stime) {
   }
 }
 
+thread_local int _tls_data1 = 100;
+thread_local uint8_t _tls_data2 = 200;
+thread_local int _tls_global1;
+thread_local uint64_t _tls_global2;
+
+void tls_thread(void*) {
+  auto pid = getpid();
+
+  _tls_data1 += btime();
+  _tls_data2 += pid;
+  _tls_global2 += btime();
+
+  Msh::Instance().printf("\n %d -> data1: %d", pid, _tls_data1);
+  Msh::Instance().printf("\n %d -> data2 %u", pid, _tls_data2);
+  Msh::Instance().printf("\n %d -> global1: %d", pid, _tls_global1);
+  Msh::Instance().printf("\n %d -> global2: %lu", pid, _tls_global2);
+}
+
 void MshCommand::printUsage() {
   Msh::Instance().printf("Usage: %s %s\n", _name.c_str(), _usage.c_str());
 }
@@ -162,7 +180,7 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       threads.push_back(exect(thread_loop, (void*)2));
       threads.push_back(exect(thread_loop, (void*)3));
       threads.push_back(exect(thread_loop, (void*)4));
-      for(auto& id : threads) {
+      for(auto id : threads) {
         waitpid(id);
       }
     } else if (type == "mem") {
@@ -188,6 +206,21 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       for(auto& id : threads) {
         waitpid(id);
       }
+    } else if (type == "tls") {
+      upan::vector<int> threads;
+      threads.push_back(exect(tls_thread, nullptr));
+      threads.push_back(exect(tls_thread, nullptr));
+      threads.push_back(exect(tls_thread, nullptr));
+      threads.push_back(exect(tls_thread, nullptr));
+
+      for(auto& id : threads) {
+        waitpid(id);
+      }
+
+      Msh::Instance().printf("\n TLS data1: %d", _tls_data1);
+      Msh::Instance().printf("\n TLS data2 %u", _tls_data2);
+      Msh::Instance().printf("\n TLS global1: %d", _tls_global1);
+      Msh::Instance().printf("\n TLS global2: %lu", _tls_global2);
     }
   }
 }
