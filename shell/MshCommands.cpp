@@ -143,6 +143,8 @@ thread_local int _tls_data1 = 100;
 thread_local uint8_t _tls_data2 = 200;
 thread_local int _tls_global1;
 thread_local uint64_t _tls_global2;
+extern thread_local int _lib_data1_thread_local;
+extern thread_local int _lib_global1_thread_local;
 
 void tls_thread(void*) {
   auto pid = getpid();
@@ -150,11 +152,15 @@ void tls_thread(void*) {
   _tls_data1 += btime();
   _tls_data2 += pid;
   _tls_global2 += btime();
+  _lib_data1_thread_local += 1;
+  _lib_global1_thread_local += 1;
 
   Msh::Instance().printf("\n %d -> data1: %d", pid, _tls_data1);
-  Msh::Instance().printf("\n %d -> data2 %u", pid, _tls_data2);
+  Msh::Instance().printf("\n %d -> data2: %u", pid, _tls_data2);
   Msh::Instance().printf("\n %d -> global1: %d", pid, _tls_global1);
   Msh::Instance().printf("\n %d -> global2: %lu", pid, _tls_global2);
+  Msh::Instance().printf("\n %d -> lib-data1: %d", pid, _lib_data1_thread_local);
+  Msh::Instance().printf("\n %d -> lib-global1: %d", pid, _lib_global1_thread_local);
 }
 
 void MshCommand::printUsage() {
@@ -221,6 +227,9 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       Msh::Instance().printf("\n TLS data2 %u", _tls_data2);
       Msh::Instance().printf("\n TLS global1: %d", _tls_global1);
       Msh::Instance().printf("\n TLS global2: %lu", _tls_global2);
+      Msh::Instance().printf("\n TLS lib-data1: %d", _lib_data1_thread_local);
+      Msh::Instance().printf("\n TLS lib-global1: %d", _lib_global1_thread_local);
+
     }
   }
 }
@@ -585,7 +594,8 @@ void MshCommandExportEvnVar::execute(const MshCommandExecutor& cmdExec) {
     return ;
 
   const auto& szExp = cmdExec.params()[0];
-  const auto& tokens = upan::tokenize(szExp.c_str(), '=');
+  upan::vector<upan::string> tokens;
+  szExp.tokenize("=", true, tokens);
   if (tokens.size() < 2) {
     printUsage();
     return ;
