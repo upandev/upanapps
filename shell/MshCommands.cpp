@@ -25,7 +25,6 @@
 # include <fs.h>
 # include <drive.h>
 # include <error.h>
-# include <stringalgo.h>
 # include <MshCommands.h>
 # include <MshCommandExecutor.h>
 # include <Msh.h>
@@ -152,7 +151,7 @@ void tls_thread(void*) {
   _tls_data1 += btime();
   _tls_data2 += pid;
   _tls_global2 += btime();
-  _lib_data1_thread_local += 1;
+  _lib_data1_thread_local += getpid();
   _lib_global1_thread_local += 1;
 
   Msh::Instance().printf("\n %d -> data1: %d", pid, _tls_data1);
@@ -161,6 +160,9 @@ void tls_thread(void*) {
   Msh::Instance().printf("\n %d -> global2: %lu", pid, _tls_global2);
   Msh::Instance().printf("\n %d -> lib-data1: %d", pid, _lib_data1_thread_local);
   Msh::Instance().printf("\n %d -> lib-global1: %d", pid, _lib_global1_thread_local);
+  access_thread_local_test();
+  Msh::Instance().printf("\n %d -> (3)lib-data1: %d", pid, _lib_data1_thread_local);
+  Msh::Instance().printf("\n %d -> (3)lib-global1: %d", pid, _lib_global1_thread_local);
 }
 
 void MshCommand::printUsage() {
@@ -229,7 +231,9 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       Msh::Instance().printf("\n TLS global2: %lu", _tls_global2);
       Msh::Instance().printf("\n TLS lib-data1: %d", _lib_data1_thread_local);
       Msh::Instance().printf("\n TLS lib-global1: %d", _lib_global1_thread_local);
-
+      access_thread_local_test();
+      Msh::Instance().printf("\n TLS (3)lib-data1: %d", _lib_data1_thread_local);
+      Msh::Instance().printf("\n TLS (3)lib-global1: %d", _lib_global1_thread_local);
     }
   }
 }

@@ -28,8 +28,10 @@ _start:
 	push %rdi
 	push %rsi
 
+    # Relocate cross module references such as TLS variables
+    call _dll_init_relocate
 	# Prepare signals, memory allocation, stdio and such.
-	call initialize_standard_library
+	call _initialize_standard_library
 	
   # Run the global constructors.
 	call _init
