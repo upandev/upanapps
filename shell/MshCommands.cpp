@@ -29,6 +29,7 @@
 # include <MshCommandExecutor.h>
 # include <Msh.h>
 # include <file_stream.h>
+# include <math.h>
 
 //test functions
 static void recurse(int count) {
@@ -163,6 +164,9 @@ void tls_thread(void*) {
   access_thread_local_test();
   Msh::Instance().printf("\n %d -> (3)lib-data1: %d", pid, _lib_data1_thread_local);
   Msh::Instance().printf("\n %d -> (3)lib-global1: %d", pid, _lib_global1_thread_local);
+  tls_xlib_test();
+  Msh::Instance().printf("\n %d -> (X)lib-data1: %d", pid, _lib_data1_thread_local);
+  Msh::Instance().printf("\n %d -> (X)lib-global1: %d", pid, _lib_global1_thread_local);
 }
 
 void MshCommand::printUsage() {
@@ -234,6 +238,9 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       access_thread_local_test();
       Msh::Instance().printf("\n TLS (3)lib-data1: %d", _lib_data1_thread_local);
       Msh::Instance().printf("\n TLS (3)lib-global1: %d", _lib_global1_thread_local);
+      tls_xlib_test();
+      Msh::Instance().printf("\n TLS (X)lib-data1: %d", _lib_data1_thread_local);
+      Msh::Instance().printf("\n TLS (X)lib-global1: %d", _lib_global1_thread_local);
     }
   }
 }
