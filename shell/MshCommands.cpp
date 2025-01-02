@@ -30,6 +30,7 @@
 # include <Msh.h>
 # include <file_stream.h>
 # include <math.h>
+# include <net/socket.h>
 
 //test functions
 static void recurse(int count) {
@@ -241,6 +242,15 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       tls_xlib_test();
       Msh::Instance().printf("\n TLS (X)lib-data1: %d", _lib_data1_thread_local);
       Msh::Instance().printf("\n TLS (X)lib-global1: %d", _lib_global1_thread_local);
+    } else if (type == "net") {
+      Msh::Instance().printf("\n BROADCAST MAC %02x:%02x:%02x:%02x:%02x:%02x",
+                             INADDR_MAC_BROADCAST[0],
+                             INADDR_MAC_BROADCAST[1],
+                             INADDR_MAC_BROADCAST[2],
+                             INADDR_MAC_BROADCAST[3],
+                             INADDR_MAC_BROADCAST[4],
+                             INADDR_MAC_BROADCAST[5]);
+      test_initialized_globals();
     }
   }
 }
@@ -308,7 +318,17 @@ void MshCommandListDir::showDirContent(const MshCommandExecutor& cmdExec, const 
     // Attr, User, Size, Create Time, Modify Time, Access Time, Name
     for(int i = 0; i < size; i++) {
       format_dir_attr(dirList[i]._stat.st_mode, rwx) ;
-      Msh::Instance().printf("\n%-15s%-15d%s", rwx, dirList[i]._stat.st_size, dirList[i]._name) ;
+
+      struct tm t;
+      char createdTime[20];
+      localtime(&t, &dirList[i]._stat.st_ctime.tv_sec);
+      sprintf(createdTime, "%02d/%02d/%d %02d:%02d:%02d", t.tm_mday, t.tm_mon, t.tm_year, t.tm_hour, t.tm_min, t.tm_sec);
+
+      char modifiedTime[20];
+      localtime(&t, &dirList[i]._stat.st_mtime.tv_sec);
+      sprintf(modifiedTime, "%02d/%02d/%d %02d:%02d:%02d", t.tm_mday, t.tm_mon, t.tm_year, t.tm_hour, t.tm_min, t.tm_sec);
+
+      Msh::Instance().printf("\n%-15s%-5d%-24s%-24s%s", rwx, dirList[i]._stat.st_size, createdTime, modifiedTime, dirList[i]._name) ;
     }
   } else {
     for(int i = 0; i < size; i++)

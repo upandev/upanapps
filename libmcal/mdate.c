@@ -1,7 +1,6 @@
 #include <mdate.h>
 
-static const mdate seedDate = { 15, 8, 1947, FRIDAY } ;
-//static const mdate seedDate = { 31, 12, 1999, FRIDAY } ;
+static const mdate seedDate = { 1, 1, 1970, THURSDAY } ;
 
 /* Day of Month is the only one which is 1 based index */
 
@@ -546,9 +545,9 @@ int localtime(struct tm* t, const time_t* time)
 	int days = *time / (HRS_IN_DAY) ;
 	mdate_AddDays(&d1, days) ;
 
-	t->tm_mday = d1.dayOfMonth ;
-	t->tm_mon = d1.month ;
-	t->tm_year = d1.year - 1900;// % 100 ;
+	t->tm_mday = d1.dayOfMonth;
+	t->tm_mon = d1.month;
+	t->tm_year = d1.year;
 
 	int resi = *time % HRS_IN_DAY ;
 	t->tm_hour = resi / 3600 ;
