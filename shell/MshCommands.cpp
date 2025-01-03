@@ -328,7 +328,7 @@ void MshCommandListDir::showDirContent(const MshCommandExecutor& cmdExec, const 
       localtime(&t, &dirList[i]._stat.st_mtime.tv_sec);
       sprintf(modifiedTime, "%02d/%02d/%d %02d:%02d:%02d", t.tm_mday, t.tm_mon, t.tm_year, t.tm_hour, t.tm_min, t.tm_sec);
 
-      Msh::Instance().printf("\n%-15s%-5d%-24s%-24s%s", rwx, dirList[i]._stat.st_size, createdTime, modifiedTime, dirList[i]._name) ;
+      Msh::Instance().printf("\n%-15s%-15d%-24s%-24s%s", rwx, dirList[i]._stat.st_size, createdTime, modifiedTime, dirList[i]._name) ;
     }
   } else {
     for(int i = 0; i < size; i++)

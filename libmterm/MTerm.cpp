@@ -91,8 +91,9 @@ static upanui::ConsoleCanvas* _consoleCanvas = nullptr;
 
 upanui::ConsoleCanvas* MTerm_InitScr() {
   upanui::GraphicsContext::Init();
-  upanui::GraphicsContext::Instance().initUIRootWithoutAutoRefresh();
+  auto& uiRoot = upanui::GraphicsContext::Instance().initUIRootWithoutAutoRefresh();
   _consoleCanvas = new upanui::ConsoleCanvas();
+  uiRoot.add(*_consoleCanvas);
 
   MAX_ROWS = _consoleCanvas->maxRows();
   MAX_COLS = _consoleCanvas->maxColumns();
