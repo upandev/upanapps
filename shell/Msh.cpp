@@ -71,7 +71,11 @@ void Msh::updatePrompt() {
 
 void Msh::execute(const upan::string& cmdLine) {
   MshCommandExecutor cmdExec(cmdLine);
-  cmdExec.execute();
+  try {
+    cmdExec.execute();
+  } catch(const upan::exception& e) {
+    Msh::Instance().printf("\n%s", e.ErrorMsg().c_str());
+  }
   updatePrompt();
   if (_terminal) {
     _terminal->setPrompt(_prompt);
