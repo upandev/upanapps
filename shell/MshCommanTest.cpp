@@ -25,7 +25,7 @@
 #include <MshCommandExecutor.h>
 #include <file_stream.h>
 #include <math.h>
-#include <net/socket.h>
+#include <sys/socket.h>
 #include <unet.h>
 
 //test functions
