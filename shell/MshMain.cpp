@@ -21,6 +21,7 @@
  */
 
 #include <Msh.h>
+#include <syslog.h>
 
 class TG {
 public:
@@ -33,9 +34,12 @@ public:
 static const TG x;
 
 int main(int argc, char** argv) {
-  printf("\n TG x = %d", x.val);
+  openlog("msh", LOG_PID | LOG_CONS, LOG_USER);
+  syslog(LOG_INFO, "msh started");
+  setlogmask(LOG_UPTO(LOG_DEBUG));
+  syslog(LOG_DEBUG, "TG x = %d", x.val);
   for(int i = 0; i < argc; ++i) {
-    printf("\n%s", argv[i]);
+    syslog(LOG_DEBUG, "%s", argv[i]);
   }
 
   try {
