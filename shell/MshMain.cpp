@@ -26,7 +26,12 @@
 class TG {
 public:
   TG() {
+    printf("\n GLOBAL TG Constructor");
     val = 200;
+  }
+
+  ~TG() {
+    printf("\n GLOBAL TG Destructor");
   }
   int val;
 };
@@ -50,4 +55,3 @@ int main(int argc, char** argv) {
 
 	return 0 ;
 }
-

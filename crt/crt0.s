@@ -28,18 +28,20 @@ _start:
 	push %rdi
 	push %rsi
 
-    # Relocate cross module references such as TLS variables
-    call _dll_init_relocate
+    # 1. Relocate cross module references such as TLS variables
+    # 2. Call dll _init that initializes global objects defined in the dll
+    # 3. Call _init of the main executable that initialized global objects defined in the main executable
+    call _process_init_relocate
+
 	# Prepare signals, memory allocation, stdio and such.
 	call _initialize_standard_library
 	
-  # Run the global constructors.
-	call _init
-
 	pop %rsi
 	pop %rdi
 	# Run main
 	call main
+
+    # global destructos of the executable and all the shared libraries will be invoked as part of exit() - defined in libc
 
 	# Terminate the process with the exit code.
 	mov %rax, %rdi
