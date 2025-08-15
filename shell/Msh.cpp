@@ -59,14 +59,13 @@ Msh::Msh() : PROMPT_BASE("msh:"), _terminal(nullptr) {
   add_cmd(new MshCommandHelp());
   add_cmd(new MshCommandGetProcessDetails());
   add_cmd(new MshCommandExportEvnVar());
+  add_cmd(new MshCommandListEnv());
 
   updatePrompt();
 }
 
 void Msh::updatePrompt() {
-  char pwd[256] = "";
-  getenv("PWD", pwd);
-  _prompt = PROMPT_BASE + pwd;
+  _prompt = PROMPT_BASE + getenv("PWD");
 }
 
 void Msh::execute(const upan::string& cmdLine) {

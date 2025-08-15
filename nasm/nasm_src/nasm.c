@@ -718,8 +718,8 @@ static void parse_cmdline(int argc, char **argv)
     /*
      * First, process the NASMENV environment variable.
      */
-    char envreal[256] = "\0";
-    if (!getenv("NASMENV", envreal)) {
+    const char* envreal = getenv("NASMENV");
+    if (envreal) {
         envcopy = nasm_strdup(envreal);
         process_args(envcopy);
         nasm_free(envcopy);

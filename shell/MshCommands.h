@@ -213,3 +213,11 @@ public:
   }
   virtual void execute(const MshCommandExecutor&) override;
 };
+
+class MshCommandListEnv : public MshCommand {
+public:
+  MshCommandListEnv() : MshCommand("env", "env", 0, 0) {
+  }
+  virtual void execute(const MshCommandExecutor&) override;
+};
+

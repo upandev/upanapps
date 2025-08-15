@@ -34,7 +34,7 @@ void MshCommand::printUsage() {
 
 void MshCommandEcho::execute(const MshCommandExecutor& cmdExec) {
   if (!cmdExec.params().empty()) {
-    puts(cmdExec.params()[0].c_str());
+    Msh::Instance().printf("%s\n", cmdExec.params()[0].c_str());
   }
 }
 
@@ -126,9 +126,7 @@ void MshCommandChangeDir::execute(const MshCommandExecutor& cmdExec) {
 }
 
 void MshCommandPresentWorkingDir::execute(const MshCommandExecutor& cmdExec) {
-  char pwd[256];
-  getenv("PWD", pwd);
-  Msh::Instance().printf("%s", pwd) ;
+  Msh::Instance().printf("%s", getenv("PWD")) ;
 }
 
 void MshCommandCopyFile::execute(const MshCommandExecutor& cmdExec) {
@@ -408,9 +406,19 @@ void MshCommandExportEvnVar::execute(const MshCommandExecutor& cmdExec) {
     printUsage();
     return ;
   }
-  if(setenv(tokens[0].c_str(), tokens[1].c_str()) < 0)
+
+  if(setenv(tokens[0].c_str(), tokens[1].c_str(), 1))
   {
     Msh::Instance().printf("\n Failed to set env variable\n") ;
     return ;
+  }
+}
+
+void MshCommandListEnv::execute(const MshCommandExecutor& cmdExec) {
+  const char** environ = getenviron();
+  if (environ) {
+    for(int i = 0; environ[i]; ++i) {
+      Msh::Instance().printf("%s\n", environ[i]);
+    }
   }
 }

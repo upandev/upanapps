@@ -950,10 +950,9 @@ static char *detoken(Token * tlist, int expand_locals)
     len = 0;
     for (t = tlist; t; t = t->next) {
         if (t->type == TOK_PREPROC_ID && t->text[1] == '!') {
-            char p[256];
-            int ret = getenv(t->text + 2, p);
+            const char* p = getenv(t->text + 2);
             nasm_free(t->text);
-            if (!ret)
+            if (p)
                 t->text = nasm_strdup(p);
             else
                 t->text = NULL;
