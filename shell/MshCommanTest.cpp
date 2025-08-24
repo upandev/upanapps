@@ -27,6 +27,8 @@
 #include <math.h>
 #include <sys/socket.h>
 #include <unet.h>
+#include <signal.h>
+#include <syslog.h>
 
 //test functions
 static void recurse(int count) {
@@ -268,10 +270,41 @@ static void test_tcp_client() {
   close(sd);
 }
 
+void sig_handler(int signum) {
+  printf("\nCaught signal: %d", signum);
+}
+
+void sig_action(int signum, siginfo_t* info, void* context) {
+  printf("\nCaught signal: %d, SigInfo val: %d", signum, info->si_value.sival_int);
+}
+
 void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
   if (cmdExec.params().size()) {
     const upan::string& type = cmdExec.params()[0];
-    if (type == "tcp-server") {
+    if (type == "sig_handler") {
+      int signal = atoi(cmdExec.params()[1].c_str());
+      struct sigaction sa;
+      memset(&sa, 0, sizeof(struct sigaction));
+      sa.sa_handler = sig_handler;
+      if (sigaction(signal, &sa, nullptr)) {
+        Msh::Instance().printf("\nFailed to set signal handler");
+      } else {
+        Msh::Instance().printf("\nRegistered set signal handler");
+      }
+    } else if (type == "sig_action") {
+      int signal = atoi(cmdExec.params()[1].c_str());
+      struct sigaction sa;
+      memset(&sa, 0, sizeof(struct sigaction));
+      sa.sa_flags = SA_SIGINFO;
+      sa.sa_sigaction = sig_action;
+
+      struct sigaction old_sa;
+      if (sigaction(signal, &sa, &old_sa)) {
+        Msh::Instance().printf("\nFailed to set signal action handler");
+      } else {
+        Msh::Instance().printf("\nRegistered set signal action handler - old_sa: %d", old_sa.sa_flags);
+      }
+    } else if (type == "tcp-server") {
       test_tcp_server();
     } else if (type == "tcp-client") {
       test_tcp_client();
