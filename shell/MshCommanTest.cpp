@@ -29,6 +29,7 @@
 #include <unet.h>
 #include <signal.h>
 #include <syslog.h>
+#include <setjmp.h>
 
 //test functions
 static void recurse(int count) {
@@ -278,10 +279,29 @@ void sig_action(int signum, siginfo_t* info, void* context) {
   printf("\nCaught signal: %d, SigInfo val: %d", signum, info->si_value.sival_int);
 }
 
+static sigjmp_buf segv_jmp_buf;
+
+void sig_segv_avoid(int signum, siginfo_t* info, void* context) {
+  printf("\nSegmentation fault @ %llx\n", info->si_value.sival_ptr);
+  siglongjmp(segv_jmp_buf, 1);
+}
+
 void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
   if (cmdExec.params().size()) {
     const upan::string& type = cmdExec.params()[0];
-    if (type == "sig_handler") {
+    if (type == "sig_segv") {
+      struct sigaction sa;
+      memset(&sa, 0, sizeof(struct sigaction));
+      sa.sa_flags = SA_SIGINFO;
+      sa.sa_sigaction = sig_segv_avoid;
+      sigaction(SIGSEGV, &sa, nullptr);
+      if (sigsetjmp(segv_jmp_buf, 1) == 0) {
+        int* p = (int*)0x123;
+        *p = 10;
+      } else {
+        Msh::Instance().printf("\nGracefully recovered from Segmentation fault!");
+      }
+    } else if (type == "sig_handler") {
       int signal = atoi(cmdExec.params()[1].c_str());
       struct sigaction sa;
       memset(&sa, 0, sizeof(struct sigaction));
