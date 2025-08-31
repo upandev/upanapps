@@ -48,7 +48,7 @@ void MshCommandExit::execute(const MshCommandExecutor& cmdExec) {
 
 void MshCommandCreateDir::execute(const MshCommandExecutor& cmdExec) {
   for(const auto& param : cmdExec.params()) {
-    if(mkdir(param.c_str(), ATTR_DIR_DEFAULT | ATTR_TYPE_DIRECTORY) < 0) {
+    if(mkdir(param.c_str(), ATTR_DIR_DEFAULT) < 0) {
       printerr("%s : Directory Creation Failed", param.c_str()) ;
     }
   }
