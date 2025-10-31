@@ -223,8 +223,7 @@ static void test_tcp_server() {
   close(sd);
 }
 
-static void test_tcp_client() {
-  const upan::string& host = "192.168.50.208";
+static void test_tcp_client(const upan::string& host) {
   const int server_port = 12345;
   char message[1024] = "Hello, TCP Server!";
 
@@ -327,7 +326,7 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
     } else if (type == "tcp-server") {
       test_tcp_server();
     } else if (type == "tcp-client") {
-      test_tcp_client();
+      test_tcp_client(cmdExec.params()[1]);
     } else if (type == "recurse") {
       int count = atoi(cmdExec.params()[1].c_str());
       Msh::Instance().printf("\n Stack Limit Test - Recurse %d times", count);
