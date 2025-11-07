@@ -29,12 +29,12 @@
 # include <Msh.h>
 
 void MshCommand::printUsage() {
-  Msh::Instance().printf("Usage: %s %s\n", _name.c_str(), _usage.c_str());
+  printf("Usage: %s %s\n", _name.c_str(), _usage.c_str());
 }
 
 void MshCommandEcho::execute(const MshCommandExecutor& cmdExec) {
   if (!cmdExec.params().empty()) {
-    Msh::Instance().printf("%s\n", cmdExec.params()[0].c_str());
+    printf("%s\n", cmdExec.params()[0].c_str());
   }
 }
 
@@ -71,17 +71,17 @@ void MshCommandListDir::execute(const MshCommandExecutor& cmdExec) {
 
     for (const auto& param : cmdExec.params()) {
       if (get_dir_content(param.c_str(), &dirList, &size) < 0) {
-        Msh::Instance().printf("%s : No Such Directory/File", param.c_str());
+        printf("%s : No Such Directory/File", param.c_str());
       } else {
         if (bDisplayParentDirName)
-          Msh::Instance().printf("\n\n %s :", param.c_str());
+          printf("\n\n %s :", param.c_str());
         showDirContent(cmdExec, dirList, size);
         free(dirList);
       }
     }
   } else {
     if (get_dir_content("", &dirList, &size) < 0) {
-      Msh::Instance().printf("\nFailed to Get Directory Content");
+      printf("\nFailed to Get Directory Content");
     } else {
       showDirContent(cmdExec, dirList, size);
       free(dirList);
@@ -105,15 +105,15 @@ void MshCommandListDir::showDirContent(const MshCommandExecutor& cmdExec, const 
       localtime(&t, &dirList[i]._stat.st_mtime.tv_sec);
       sprintf(modifiedTime, "%02d/%02d/%d %02d:%02d:%02d", t.tm_mday, t.tm_mon, t.tm_year, t.tm_hour, t.tm_min, t.tm_sec);
 
-      Msh::Instance().printf("\n%-15s%-15d%-24s%-24s%s", rwx, dirList[i]._stat.st_size, createdTime, modifiedTime, dirList[i]._name) ;
+      printf("\n%-15s%-15d%-24s%-24s%s", rwx, dirList[i]._stat.st_size, createdTime, modifiedTime, dirList[i]._name) ;
     }
   } else {
     for(int i = 0; i < size; i++)
     {
       if(!(i % 3) && i != 0) {
-        Msh::Instance().printf("\n");
+        printf("\n");
       }
-      Msh::Instance().printf("%-20s", dirList[i]._name) ;
+      printf("%-20s", dirList[i]._name) ;
     }
   }
 }
@@ -126,7 +126,7 @@ void MshCommandChangeDir::execute(const MshCommandExecutor& cmdExec) {
 }
 
 void MshCommandPresentWorkingDir::execute(const MshCommandExecutor& cmdExec) {
-  Msh::Instance().printf("%s", getenv("PWD")) ;
+  printf("%s", getenv("PWD")) ;
 }
 
 void MshCommandCopyFile::execute(const MshCommandExecutor& cmdExec) {
@@ -164,7 +164,7 @@ void MshCommandCopyFile::execute(const MshCommandExecutor& cmdExec) {
     return ;
   }
 
-  Msh::Instance().printf("\n Progress = ") ;
+  printf("\n Progress = ") ;
   //TODO:
   int cr = 0;// upanui::TerminalConsole::Instance().getCurPos();
 
@@ -173,7 +173,7 @@ void MshCommandCopyFile::execute(const MshCommandExecutor& cmdExec) {
   struct stat fStat;
   if(fstat(fdSrc, &fStat) < 0)
   {
-    Msh::Instance().printf("\n Failed to get stat on file: %s", szSrcFileName.c_str()) ;
+    printf("\n Failed to get stat on file: %s", szSrcFileName.c_str()) ;
     close(fdSrc) ;
     close(fdDest) ;
     return ;
@@ -273,7 +273,7 @@ void MshCommandDate::execute(const MshCommandExecutor& cmdExec) {
   RTCDateTime rtcDateTime ;
   dtime(&rtcDateTime) ;
 
-  Msh::Instance().printf("%d/%d/%d %d:%d:%d", rtcDateTime._dayOfMonth, rtcDateTime._month,
+  printf("%d/%d/%d %d:%d:%d", rtcDateTime._dayOfMonth, rtcDateTime._month,
          rtcDateTime._century * 100 + rtcDateTime._year, rtcDateTime._hour, rtcDateTime._minute,
          rtcDateTime._second) ;
 }
@@ -297,7 +297,7 @@ void MshCommandShowDrives::execute(const MshCommandExecutor& cmdExec) {
 
   int i ;
 
-  Msh::Instance().printf("%-4s | %-10s| %-10s| %-10s| %-10s| %-10s| %-8s\n",
+  printf("%-4s | %-10s| %-10s| %-10s| %-10s| %-10s| %-8s\n",
          "SlNo", "DriveName", "Size(Phy)", "Total(fs)", "Used(fs)", "Free(fs)", "Mounted") ;
   for(i = 0; i < 4*1 + 10*6 + 3*5; i++)
     putc('-', stdout) ;
@@ -306,9 +306,9 @@ void MshCommandShowDrives::execute(const MshCommandExecutor& cmdExec) {
   {
     //TODO: use float after coprocessor support
     //float fSize = (pDriveList[i].uiSizeInSectors * 512) / (1024 * 1024) ;
-    //Msh::Instance().printf("\n[Drive %d] %s (%f MB)", i + 1, pDriveList[i].driveName, fSize) ;
+    //printf("\n[Drive %d] %s (%f MB)", i + 1, pDriveList[i].driveName, fSize) ;
 
-    Msh::Instance().printf("\n%-4d   %-10s  %-10d  %-10d  %-10d  %-10d  %-8s", i + 1,
+    printf("\n%-4d   %-10s  %-10d  %-10d  %-10d  %-10d  %-8s", i + 1,
            pDriveList[i].driveName, (pDriveList[i].uiSizeInSectors * 512),
            pDriveList[i].ulTotalSize, pDriveList[i].ulUsedSize,
            (pDriveList[i].ulTotalSize - pDriveList[i].ulUsedSize),
@@ -354,7 +354,7 @@ void MshCommandShowCurrentDrive::execute(const MshCommandExecutor& cmdExec) {
   if(getcurdrive(&driveStat) < 0)
     printerr("Failed to get current drive") ;
 
-  Msh::Instance().printf("%s (%d B) %s", driveStat.driveName, driveStat.uiSizeInSectors * 512,
+  printf("%s (%d B) %s", driveStat.driveName, driveStat.uiSizeInSectors * 512,
          (driveStat.bMounted) ? "-- mounted" : "not mounted") ;
 }
 
@@ -367,7 +367,7 @@ void MshCommandHelp::execute(const MshCommandExecutor& cmdExec) {
   for(auto cmd : Msh::Instance().getCommands()) {
     if(!(i % 3) && i != 0)
       putc('\n', stdout) ;
-    Msh::Instance().printf("%-20s", cmd.second->name().c_str()) ;
+    printf("%-20s", cmd.second->name().c_str()) ;
     ++i;
   }
 }
@@ -378,16 +378,16 @@ void MshCommandGetProcessDetails::execute(const MshCommandExecutor& cmdExec) {
 
   if(getpslist(&pPS, &uiSize) < 0)
   {
-    Msh::Instance().printf("\n Error\n", ' ') ;
+    printf("\n Error\n", ' ') ;
     return ;
   }
 
-  Msh::Instance().printf("\n %-7s%-7s%-7s%-18s%-7s%-15s", "Pid", "PPid", "PGid", "Status", "Uid", "Proc Name") ;
-  Msh::Instance().printf("\n ------------------------------------------------------------\n") ;
+  printf("\n %-7s%-7s%-7s%-18s%-7s%-15s", "Pid", "PPid", "PGid", "Status", "Uid", "Proc Name") ;
+  printf("\n ------------------------------------------------------------\n") ;
   unsigned i ;
   for(i = 0; i < uiSize; i++)
   {
-    Msh::Instance().printf("\n %-7d%-7d%-7d%-18s%-7d%-15s", pPS[i].pid, pPS[i].iParentProcessID, pPS[i].iProcessGroupID, get_proc_status_desc(pPS[i].status),
+    printf("\n %-7d%-7d%-7d%-18s%-7d%-15s", pPS[i].pid, pPS[i].iParentProcessID, pPS[i].iProcessGroupID, get_proc_status_desc(pPS[i].status),
            pPS[i].iUserID,	pPS[i].pname) ;
   }
   putc('\n', stdout) ;
@@ -409,7 +409,7 @@ void MshCommandExportEvnVar::execute(const MshCommandExecutor& cmdExec) {
 
   if(setenv(tokens[0].c_str(), tokens[1].c_str(), 1))
   {
-    Msh::Instance().printf("\n Failed to set env variable\n") ;
+    printf("\n Failed to set env variable\n") ;
     return ;
   }
 }
@@ -418,7 +418,7 @@ void MshCommandListEnv::execute(const MshCommandExecutor& cmdExec) {
   const char** environ = getenviron();
   if (environ) {
     for(int i = 0; environ[i]; ++i) {
-      Msh::Instance().printf("%s\n", environ[i]);
+      printf("%s\n", environ[i]);
     }
   }
 }

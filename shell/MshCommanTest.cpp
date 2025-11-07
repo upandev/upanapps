@@ -36,7 +36,7 @@ static void recurse(int count) {
   char buffer[1024];
   if (count > 0) {
     sprintf(buffer, "\n Recurse count: %d", count);
-    Msh::Instance().printf("%s", buffer);
+    printf("%s", buffer);
     recurse(count - 1);
   }
 }
@@ -45,7 +45,7 @@ class Num {
 public:
   Num(int i) : _i(i) {}
   void Print() {
-    Msh::Instance().printf("%d ", _i);
+    printf("%d ", _i);
   }
   int getI() {
     return _i;
@@ -57,7 +57,7 @@ private:
 static void thread(void* param) {
   Num* n = static_cast<Num*>(param);
   upan::vector<Num*> nums;
-  Msh::Instance().printf("\n Seed: %d", n->getI());
+  printf("\n Seed: %d", n->getI());
   for(int j = 0; j < n->getI(); ++j) {
     for (int i = 0; i < 1000; ++i) {
       nums.push_back(new Num(n->getI() + i));
@@ -66,8 +66,8 @@ static void thread(void* param) {
     for (int i = 0; i < nums.size(); ++i) {
       sum += nums[i]->getI();
     }
-    Msh::Instance().printf("\n Result: %d", sum);
-    Msh::Instance().printf("\n");
+    printf("\n Result: %d", sum);
+    printf("\n");
     for (int i = 0; i < nums.size(); ++i) {
       delete nums[i];
     }
@@ -107,12 +107,12 @@ static void thread_loop(void* x) {
       if (counter4 == 1000000) break;
     }
   }
-  Msh::Instance().printf("Thread Completed: %d\n", getpid());
+  printf("Thread Completed: %d\n", getpid());
 }
 
 void print_output(const upan::string& msg) {
   upan::mutex_guard g(getM());
-  Msh::Instance().printf("\n Thread : %d -> %s", getpid(), msg.c_str());
+  printf("\n Thread : %d -> %s", getpid(), msg.c_str());
 }
 
 void reader_thread(void* stime) {
@@ -155,18 +155,18 @@ void tls_thread(void*) {
   _lib_data1_thread_local += getpid();
   _lib_global1_thread_local += 1;
 
-  Msh::Instance().printf("\n %d -> data1: %d", pid, _tls_data1);
-  Msh::Instance().printf("\n %d -> data2: %u", pid, _tls_data2);
-  Msh::Instance().printf("\n %d -> global1: %d", pid, _tls_global1);
-  Msh::Instance().printf("\n %d -> global2: %lu", pid, _tls_global2);
-  Msh::Instance().printf("\n %d -> lib-data1: %d", pid, _lib_data1_thread_local);
-  Msh::Instance().printf("\n %d -> lib-global1: %d", pid, _lib_global1_thread_local);
+  printf("\n %d -> data1: %d", pid, _tls_data1);
+  printf("\n %d -> data2: %u", pid, _tls_data2);
+  printf("\n %d -> global1: %d", pid, _tls_global1);
+  printf("\n %d -> global2: %lu", pid, _tls_global2);
+  printf("\n %d -> lib-data1: %d", pid, _lib_data1_thread_local);
+  printf("\n %d -> lib-global1: %d", pid, _lib_global1_thread_local);
   access_thread_local_test();
-  Msh::Instance().printf("\n %d -> (3)lib-data1: %d", pid, _lib_data1_thread_local);
-  Msh::Instance().printf("\n %d -> (3)lib-global1: %d", pid, _lib_global1_thread_local);
+  printf("\n %d -> (3)lib-data1: %d", pid, _lib_data1_thread_local);
+  printf("\n %d -> (3)lib-global1: %d", pid, _lib_global1_thread_local);
   tls_xlib_test();
-  Msh::Instance().printf("\n %d -> (X)lib-data1: %d", pid, _lib_data1_thread_local);
-  Msh::Instance().printf("\n %d -> (X)lib-global1: %d", pid, _lib_global1_thread_local);
+  printf("\n %d -> (X)lib-data1: %d", pid, _lib_data1_thread_local);
+  printf("\n %d -> (X)lib-global1: %d", pid, _lib_global1_thread_local);
 }
 
 #define TEST_TCP_SERVER_PORT 8080
@@ -195,7 +195,7 @@ static void test_tcp_server() {
     throw upan::exception(XLOC, "listen() failed");
   }
 
-  Msh::Instance().printf("\nServer is listening on port %d...", TEST_TCP_SERVER_PORT);
+  printf("\nServer is listening on port %d...", TEST_TCP_SERVER_PORT);
 
   // Accept a connection
   socklen_t addrlen;
@@ -208,7 +208,7 @@ static void test_tcp_server() {
   int n = recv(new_sd, buffer, TEST_TCP_SERVER_BUFFER_SIZE - 1, 0);
   if (n >= 0) {
     buffer[n] = '\0'; // Null-terminate
-    Msh::Instance().printf("\nReceived: %s", buffer);
+    printf("\nReceived: %s", buffer);
   }
 
   strcpy(buffer, "Hello from Upanix server!");
@@ -216,7 +216,7 @@ static void test_tcp_server() {
   if (bytes_sent < 0) {
     throw upan::exception(XLOC, "send() failed");
   } else {
-    Msh::Instance().printf("\nSent %d bytes: %s", bytes_sent, buffer);
+    printf("\nSent %d bytes: %s", bytes_sent, buffer);
   }
 
   close(new_sd);
@@ -251,20 +251,20 @@ static void test_tcp_client(const upan::string& host) {
     throw upan::exception(XLOC, "connect() failed");
   }
 
-  Msh::Instance().printf("\nConnected to %s:%d", host.c_str(), server_port);
+  printf("\nConnected to %s:%d", host.c_str(), server_port);
 
   ssize_t bytes_sent = send(sd, message, strlen(message), 0);
   if (bytes_sent < 0) {
     throw upan::exception(XLOC, "send() failed");
   } else {
-    Msh::Instance().printf("\nSent %d bytes: %s", bytes_sent, message);
+    printf("\nSent %d bytes: %s", bytes_sent, message);
   }
 
   // 5. Receive response
   ssize_t bytes_received = recv(sd, message, 1024 - 1, 0);
   if (bytes_received > 0) {
     message[bytes_received] = '\0';
-    Msh::Instance().printf("\nReceived from server: %s", message);
+    printf("\nReceived from server: %s", message);
   }
 
   close(sd);
@@ -298,7 +298,7 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
         int* p = (int*)0x123;
         *p = 10;
       } else {
-        Msh::Instance().printf("\nGracefully recovered from Segmentation fault!");
+        printf("\nGracefully recovered from Segmentation fault!");
       }
     } else if (type == "sig_handler") {
       int signal = atoi(cmdExec.params()[1].c_str());
@@ -306,9 +306,9 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       memset(&sa, 0, sizeof(struct sigaction));
       sa.sa_handler = sig_handler;
       if (sigaction(signal, &sa, nullptr)) {
-        Msh::Instance().printf("\nFailed to set signal handler");
+        printf("\nFailed to set signal handler");
       } else {
-        Msh::Instance().printf("\nRegistered set signal handler");
+        printf("\nRegistered set signal handler");
       }
     } else if (type == "sig_action") {
       int signal = atoi(cmdExec.params()[1].c_str());
@@ -319,9 +319,9 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
 
       struct sigaction old_sa;
       if (sigaction(signal, &sa, &old_sa)) {
-        Msh::Instance().printf("\nFailed to set signal action handler");
+        printf("\nFailed to set signal action handler");
       } else {
-        Msh::Instance().printf("\nRegistered set signal action handler - old_sa: %d", old_sa.sa_flags);
+        printf("\nRegistered set signal action handler - old_sa: %d", old_sa.sa_flags);
       }
     } else if (type == "tcp-server") {
       test_tcp_server();
@@ -329,14 +329,14 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       test_tcp_client(cmdExec.params()[1]);
     } else if (type == "recurse") {
       int count = atoi(cmdExec.params()[1].c_str());
-      Msh::Instance().printf("\n Stack Limit Test - Recurse %d times", count);
+      printf("\n Stack Limit Test - Recurse %d times", count);
       recurse(count);
     } else if (type == "thread") {
       const char* seed = cmdExec.params().size() > 1 ? cmdExec.params()[1].c_str() : "0";
       Num* n = new Num(atoi(seed));
       int threadID = exect(thread, (void*)n);
       waitpid(threadID);
-      Msh::Instance().printf("\n Thread ID: %d", threadID);
+      printf("\n Thread ID: %d", threadID);
 
       upan::vector<int> threads;
       threads.push_back(exect(thread_loop, (void*)1));
@@ -353,7 +353,7 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
         m.insert(upan::map<int, int>::value_type(i, i * 10));
       }
       uint32_t e = btime();;
-      Msh::Instance().printf("\n Map size: %d, Time Taken: %u", m.size(), e - s);
+      printf("\n Map size: %d, Time Taken: %u", m.size(), e - s);
     } else if (type == "lock") {
       int threadID = exect(lock_thread, nullptr);
       btime();
@@ -380,20 +380,20 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
         waitpid(id);
       }
 
-      Msh::Instance().printf("\n TLS data1: %d", _tls_data1);
-      Msh::Instance().printf("\n TLS data2 %u", _tls_data2);
-      Msh::Instance().printf("\n TLS global1: %d", _tls_global1);
-      Msh::Instance().printf("\n TLS global2: %lu", _tls_global2);
-      Msh::Instance().printf("\n TLS lib-data1: %d", _lib_data1_thread_local);
-      Msh::Instance().printf("\n TLS lib-global1: %d", _lib_global1_thread_local);
+      printf("\n TLS data1: %d", _tls_data1);
+      printf("\n TLS data2 %u", _tls_data2);
+      printf("\n TLS global1: %d", _tls_global1);
+      printf("\n TLS global2: %lu", _tls_global2);
+      printf("\n TLS lib-data1: %d", _lib_data1_thread_local);
+      printf("\n TLS lib-global1: %d", _lib_global1_thread_local);
       access_thread_local_test();
-      Msh::Instance().printf("\n TLS (3)lib-data1: %d", _lib_data1_thread_local);
-      Msh::Instance().printf("\n TLS (3)lib-global1: %d", _lib_global1_thread_local);
+      printf("\n TLS (3)lib-data1: %d", _lib_data1_thread_local);
+      printf("\n TLS (3)lib-global1: %d", _lib_global1_thread_local);
       tls_xlib_test();
-      Msh::Instance().printf("\n TLS (X)lib-data1: %d", _lib_data1_thread_local);
-      Msh::Instance().printf("\n TLS (X)lib-global1: %d", _lib_global1_thread_local);
+      printf("\n TLS (X)lib-data1: %d", _lib_data1_thread_local);
+      printf("\n TLS (X)lib-global1: %d", _lib_global1_thread_local);
     } else if (type == "net") {
-      Msh::Instance().printf("\n BROADCAST MAC %02x:%02x:%02x:%02x:%02x:%02x",
+      printf("\n BROADCAST MAC %02x:%02x:%02x:%02x:%02x:%02x",
                              INADDR_MAC_BROADCAST[0],
                              INADDR_MAC_BROADCAST[1],
                              INADDR_MAC_BROADCAST[2],

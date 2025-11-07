@@ -73,27 +73,12 @@ void Msh::execute(const upan::string& cmdLine) {
   try {
     cmdExec.execute();
   } catch(const upan::exception& e) {
-    Msh::Instance().printf("\n%s", e.ErrorMsg().c_str());
+    printf("\n%s", e.ErrorMsg().c_str());
   }
   updatePrompt();
   if (_terminal) {
     _terminal->setPrompt(_prompt);
   }
-}
-
-void Msh::printf(const char* __restrict fmsg, ...) {
-  va_list arg;
-
-  va_start(arg, fmsg);
-
-  const int BSIZE = 1024;
-  char buf[BSIZE];
-
-  vsnprintf(buf, BSIZE, fmsg, arg);
-
-  Msh::Instance()._terminal->insertCommandOutput(buf);
-
-  va_end(arg);
 }
 
 class PassThroughMouseHandler : public upanui::MouseEventHandler {
@@ -143,7 +128,7 @@ void Msh::start() {
   CloseButtonMouseHandler closeButtonMouseHandler;
   closeBt.registerMouseEventHandler(closeButtonMouseHandler);
 
-  gc.eventManager().startEventLoop();
+  gc.eventManager().startTerminalEventLoop();
 
   exit(0);
 }

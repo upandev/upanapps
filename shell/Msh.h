@@ -45,7 +45,6 @@ public:
     return _commands;
   }
 
-  void printf(const char * __restrict fmsg, ...);
   void clearScreen() {
     _terminal->clear();
   }
