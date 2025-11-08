@@ -204,7 +204,7 @@ int main(int argc, char **argv)
             while ((line = preproc->getline()))
                 nasm_free(line);
             preproc->cleanup(0);
-            putc('\n', stdout);
+            putchar('\n');
         }
         break;
 

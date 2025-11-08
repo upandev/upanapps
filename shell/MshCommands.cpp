@@ -300,7 +300,7 @@ void MshCommandShowDrives::execute(const MshCommandExecutor& cmdExec) {
   printf("%-4s | %-10s| %-10s| %-10s| %-10s| %-10s| %-8s\n",
          "SlNo", "DriveName", "Size(Phy)", "Total(fs)", "Used(fs)", "Free(fs)", "Mounted") ;
   for(i = 0; i < 4*1 + 10*6 + 3*5; i++)
-    putc('-', stdout) ;
+    putchar('-') ;
 
   for(i = 0; i < iListSize; i++)
   {
@@ -366,7 +366,7 @@ void MshCommandHelp::execute(const MshCommandExecutor& cmdExec) {
   int i = 0;
   for(auto cmd : Msh::Instance().getCommands()) {
     if(!(i % 3) && i != 0)
-      putc('\n', stdout) ;
+      putchar('\n') ;
     printf("%-20s", cmd.second->name().c_str()) ;
     ++i;
   }
@@ -390,7 +390,7 @@ void MshCommandGetProcessDetails::execute(const MshCommandExecutor& cmdExec) {
     printf("\n %-7d%-7d%-7d%-18s%-7d%-15s", pPS[i].pid, pPS[i].iParentProcessID, pPS[i].iProcessGroupID, get_proc_status_desc(pPS[i].status),
            pPS[i].iUserID,	pPS[i].pname) ;
   }
-  putc('\n', stdout) ;
+  putchar('\n') ;
 
   freepslist(pPS, uiSize) ;
 }
