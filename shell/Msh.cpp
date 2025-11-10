@@ -121,6 +121,7 @@ void Msh::start() {
   auto& vScroller = upanui::UIObjectFactory::createVerticalScroller(uiRoot, 0, menuBarHeight, appWidth, mainHeight, scrollBarWidth, upanui::HorizontalPlacementType::STRETCHED, upanui::VerticalPlacementType::STRETCHED);
 
   _terminal = &upanui::UIObjectFactory::createTerminal(vScroller, 0, 0, appWidth - scrollBarWidth, mainHeight, _prompt, *this, upanui::HorizontalPlacementType::STRETCHED, upanui::VerticalPlacementType::STRETCHED);
+  _terminal->setFocus();
 
   PassThroughMouseHandler passThroughMouseHandler;
   uiMenuBar.registerMouseEventHandler(passThroughMouseHandler);
