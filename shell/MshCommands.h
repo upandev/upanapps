@@ -24,6 +24,7 @@
 #include <ctype.h>
 #include <ustring.h>
 #include <fs.h>
+#include <dirent.h>
 
 class MshCommandExecutor;
 
@@ -106,7 +107,7 @@ public:
   }
   virtual void execute(const MshCommandExecutor&) override;
 private:
-  void showDirContent(const MshCommandExecutor& cmdExec, const struct stat_ex* dirList, int size);
+  void showDirContent(const MshCommandExecutor& cmdExec, DIR* dirp);
 };
 
 class MshCommandChangeDir : public MshCommand {

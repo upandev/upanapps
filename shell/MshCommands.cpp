@@ -63,57 +63,57 @@ void MshCommandDeleteFile::execute(const MshCommandExecutor& cmdExec) {
 }
 
 void MshCommandListDir::execute(const MshCommandExecutor& cmdExec) {
-  int size;
-  struct stat_ex* dirList;
-
   if (!cmdExec.params().empty()) {
     bool bDisplayParentDirName = cmdExec.params().size() > 1;
 
     for (const auto& param : cmdExec.params()) {
-      if (get_dir_content(param.c_str(), &dirList, &size) < 0) {
+      DIR* dirp = opendir(param.c_str());
+      if (dirp == NULL) {
         printf("%s : No Such Directory/File", param.c_str());
       } else {
         if (bDisplayParentDirName)
           printf("\n\n %s :", param.c_str());
-        showDirContent(cmdExec, dirList, size);
-        free(dirList);
+        showDirContent(cmdExec, dirp);
+        closedir(dirp);
       }
     }
   } else {
-    if (get_dir_content("", &dirList, &size) < 0) {
+    DIR* dirp = opendir(".");
+    if (dirp == NULL) {
       printf("\nFailed to Get Directory Content");
     } else {
-      showDirContent(cmdExec, dirList, size);
-      free(dirList);
+      showDirContent(cmdExec, dirp);
+      closedir(dirp);
     }
   }
 }
 
-void MshCommandListDir::showDirContent(const MshCommandExecutor& cmdExec, const struct stat_ex* dirList, int size) {
+void MshCommandListDir::showDirContent(const MshCommandExecutor& cmdExec, DIR* dirp) {
   if(cmdExec.isOptPresent("-l")) {
     char rwx[12] ;
     // Attr, User, Size, Create Time, Modify Time, Access Time, Name
-    for(int i = 0; i < size; i++) {
-      format_dir_attr(dirList[i]._stat.st_mode, rwx) ;
+    while (auto d = readdir(dirp)) {
+      format_dir_attr(d->d_stat.st_mode, rwx) ;
 
       struct tm t;
       char createdTime[20];
-      localtime(&t, &dirList[i]._stat.st_ctime.tv_sec);
+      localtime(&t, &d->d_stat.st_ctime.tv_sec);
       sprintf(createdTime, "%02d/%02d/%d %02d:%02d:%02d", t.tm_mday, t.tm_mon, t.tm_year, t.tm_hour, t.tm_min, t.tm_sec);
 
       char modifiedTime[20];
-      localtime(&t, &dirList[i]._stat.st_mtime.tv_sec);
+      localtime(&t, &d->d_stat.st_mtime.tv_sec);
       sprintf(modifiedTime, "%02d/%02d/%d %02d:%02d:%02d", t.tm_mday, t.tm_mon, t.tm_year, t.tm_hour, t.tm_min, t.tm_sec);
 
-      printf("\n%-15s%-15d%-24s%-24s%s", rwx, dirList[i]._stat.st_size, createdTime, modifiedTime, dirList[i]._name) ;
+      printf("\n%-15s%-15d%-24s%-24s%s", rwx, d->d_stat.st_size, createdTime, modifiedTime, d->d_name) ;
     }
   } else {
-    for(int i = 0; i < size; i++)
-    {
+    int i = 0;
+    while (auto d = readdir(dirp)) {
       if(!(i % 3) && i != 0) {
         printf("\n");
       }
-      printf("%-20s", dirList[i]._name) ;
+      printf("%-20s", d->d_name) ;
+      ++i;
     }
   }
 }
