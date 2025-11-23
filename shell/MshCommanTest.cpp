@@ -85,12 +85,12 @@ upan::mutex& getM() {
   return m;
 }
 
-static void thread_loop(void* x) {
-  static int counter1 = 0;
-  static int counter2 = 0;
-  static int counter3 = 0;
-  static int counter4 = 0;
+static int counter1 = 0;
+static int counter2 = 0;
+static int counter3 = 0;
+static int counter4 = 0;
 
+static void thread_loop(void* x) {
   while(true) {
     upan::mutex_guard g(getM());
     if((uint64_t)x == 1) {
@@ -332,6 +332,7 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       printf("\n Stack Limit Test - Recurse %d times", count);
       recurse(count);
     } else if (type == "thread") {
+      getM(); //to init the mutex;
       const char* seed = cmdExec.params().size() > 1 ? cmdExec.params()[1].c_str() : "0";
       Num* n = new Num(atoi(seed));
       int threadID = exect(thread, (void*)n);
@@ -339,6 +340,11 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       printf("\n Thread ID: %d", threadID);
 
       upan::vector<int> threads;
+      counter1 = 0;
+      counter2 = 0;
+      counter3 = 0;
+      counter4 = 0;
+
       threads.push_back(exect(thread_loop, (void*)1));
       threads.push_back(exect(thread_loop, (void*)2));
       threads.push_back(exect(thread_loop, (void*)3));
