@@ -134,7 +134,8 @@ bool MshCommandExecutor::executeProcess() {
 	if(pid < 0) {
 		return false ;
 	} else if (!_runInBG) {
-		waitpid(pid) ;
+    int exitStatus;
+		waitpid(pid, &exitStatus, 0);
 	}
 	return true ;
 }

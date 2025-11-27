@@ -335,8 +335,9 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       getM(); //to init the mutex;
       const char* seed = cmdExec.params().size() > 1 ? cmdExec.params()[1].c_str() : "0";
       Num* n = new Num(atoi(seed));
-      int threadID = exect(thread, (void*)n);
-      waitpid(threadID);
+      int threadID = exect(thread, (void*)n, true);
+      int exitStatus;
+      waitpid(threadID, &exitStatus, 0);
       printf("\n Thread ID: %d", threadID);
 
       upan::vector<int> threads;
@@ -345,12 +346,13 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       counter3 = 0;
       counter4 = 0;
 
-      threads.push_back(exect(thread_loop, (void*)1));
-      threads.push_back(exect(thread_loop, (void*)2));
-      threads.push_back(exect(thread_loop, (void*)3));
-      threads.push_back(exect(thread_loop, (void*)4));
+      threads.push_back(exect(thread_loop, (void*)1, true));
+      threads.push_back(exect(thread_loop, (void*)2, true));
+      threads.push_back(exect(thread_loop, (void*)3, true));
+      threads.push_back(exect(thread_loop, (void*)4, true));
       for(auto id : threads) {
-        waitpid(id);
+        int exitStatus;
+        waitpid(id, &exitStatus, 0);
       }
     } else if (type == "mem") {
       uint32_t s = btime();
@@ -361,29 +363,31 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       uint32_t e = btime();;
       printf("\n Map size: %d, Time Taken: %u", m.size(), e - s);
     } else if (type == "lock") {
-      int threadID = exect(lock_thread, nullptr);
+      int threadID = exect(lock_thread, nullptr, true);
       btime();
     } else if (type == "fs") {
       create("/test.log", ATTR_FILE_DEFAULT);
 
       upan::vector<int> threads;
-      threads.push_back(exect(reader_thread, (void*)1));
-      threads.push_back(exect(reader_thread, (void*)2));
-      threads.push_back(exect(writer_thread, (void*)1));
-      threads.push_back(exect(writer_thread, (void*)2));
+      threads.push_back(exect(reader_thread, (void*)1, true));
+      threads.push_back(exect(reader_thread, (void*)2, true));
+      threads.push_back(exect(writer_thread, (void*)1, true));
+      threads.push_back(exect(writer_thread, (void*)2, true));
 
       for(auto& id : threads) {
-        waitpid(id);
+        int exitStatus;
+        waitpid(id, &exitStatus, 0);
       }
     } else if (type == "tls") {
       upan::vector<int> threads;
-      threads.push_back(exect(tls_thread, nullptr));
-      threads.push_back(exect(tls_thread, nullptr));
-      threads.push_back(exect(tls_thread, nullptr));
-      threads.push_back(exect(tls_thread, nullptr));
+      threads.push_back(exect(tls_thread, nullptr, true));
+      threads.push_back(exect(tls_thread, nullptr, true));
+      threads.push_back(exect(tls_thread, nullptr, true));
+      threads.push_back(exect(tls_thread, nullptr, true));
 
       for(auto& id : threads) {
-        waitpid(id);
+        int exitStatus;
+        waitpid(id, &exitStatus, 0);
       }
 
       printf("\n TLS data1: %d", _tls_data1);
