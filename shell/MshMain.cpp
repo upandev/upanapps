@@ -22,6 +22,7 @@
 
 #include <Msh.h>
 #include <syslog.h>
+#include <ussl.h>
 
 class TG {
 public:
@@ -48,6 +49,8 @@ int main(int argc, char** argv) {
   }
 
   try {
+    upan::net::ssl_context::instance().initializeServerCtx();
+    upan::net::ssl_context::instance().initializeClientCtx();
     Msh::Instance().start();
   } catch(const upan::exception& e) {
     printf("\nError: %s", e.ErrorMsg().c_str());

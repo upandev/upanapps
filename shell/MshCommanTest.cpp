@@ -27,9 +27,13 @@
 #include <math.h>
 #include <sys/socket.h>
 #include <unet.h>
-#include <signal.h>
 #include <syslog.h>
+#include <signal.h>
+#include <pthread.h>
 #include <setjmp.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <ussl.h>
 
 //test functions
 static void recurse(int count) {
@@ -110,6 +114,65 @@ static void thread_loop(void* x) {
   printf("Thread Completed: %d\n", getpid());
 }
 
+pthread_mutex_t pmutex = PTHREAD_MUTEX_INITIALIZER;
+
+static void pthread_key_value_destructor(void* v) {
+  auto val = static_cast<uint64_t*>(v);
+  printf("pthread_key_value_destructor: %lu\n", *val);;
+  delete val;
+}
+
+static void* pthread_loop(void* x) {
+  int key_count = 0;
+  int key_delete_count = 0;
+  int counter = 0;
+  pthread_key_t key;
+
+  while(true) {
+    ++counter;
+    if (key_count < 20 && counter % 1000 == 0) {
+      pthread_key_create(&key, pthread_key_value_destructor);
+      auto val = new uint64_t(counter);
+      pthread_setspecific(key, val);
+      ++key_count;
+    }
+
+    pthread_mutex_lock(&pmutex);
+
+    if((uint64_t)x == 1) {
+      ++counter1;
+      if (counter1 == 1000000) break;
+    } else if((uint64_t)x == 2) {
+      ++counter2;
+      if (counter2 == 1000000) break;
+    } else if((uint64_t)x == 3) {
+      ++counter3;
+      if (counter3 == 1000000) break;
+    } else if((uint64_t)x == 4) {
+      ++counter4;
+      if (counter4 == 1000000) break;
+    }
+
+    pthread_mutex_unlock(&pmutex);
+
+    if (key_delete_count < 5 && counter % 2000 == 0) {
+      pthread_key_delete(key);
+      ++key_delete_count;
+    }
+  }
+  for(int i = 0; i < 20; ++i) {
+    uint64_t* val = static_cast<uint64_t*>(pthread_getspecific(i));
+    if (val == nullptr) {
+      printf("%d: pthread key %d -> null\n", getpid(), i);
+    } else {
+      printf("%d: pthread key %d -> %lu\n", getpid(), i, *val);
+    }
+  }
+  printf("(p)Thread Completed: %d\n", pthread_self());
+
+  return (void*)((uint64_t)getpid());
+}
+
 void print_output(const upan::string& msg) {
   upan::mutex_guard g(getM());
   printf("\n Thread : %d -> %s", getpid(), msg.c_str());
@@ -170,6 +233,7 @@ void tls_thread(void*) {
 }
 
 #define TEST_TCP_SERVER_PORT 8080
+#define TEST_TCP_TLS_SERVER_PORT 8443
 #define TEST_TCP_SERVER_BUFFER_SIZE 1024
 
 static void test_tcp_server() {
@@ -270,6 +334,104 @@ static void test_tcp_client(const upan::string& host) {
   close(sd);
 }
 
+static void test_tcp_tls_server() {
+  struct sockaddr_in address;
+
+  auto sd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sd < 0) {
+    throw upan::exception(XLOC, "socket() failed");
+  }
+
+  address.sin_family = AF_INET;
+  address.sin_addr.s_addr = INADDR_ANY; // 0.0.0.0
+  address.sin_port = htons(TEST_TCP_TLS_SERVER_PORT);
+
+  if (bind(sd, (struct sockaddr*) &address, sizeof(address)) < 0) {
+    close(sd);
+    throw upan::exception(XLOC, "bind() failed");
+  }
+
+  if (listen(sd, 1) < 0) {
+    close(sd);
+    throw upan::exception(XLOC, "listen() failed");
+  }
+
+  printf("\nTLS Server is listening on port %d...", TEST_TCP_TLS_SERVER_PORT);
+
+  // Accept a connection
+  socklen_t addrlen;
+  auto new_sd = accept(sd, (struct sockaddr*) &address, (socklen_t*) &addrlen);
+  if (new_sd < 0) {
+    close(sd);
+    throw upan::exception(XLOC, "accept() failed");
+  }
+
+  SSL *ssl = SSL_new(upan::net::ssl_context::instance().getServerCtx());
+  SSL_set_fd(ssl, new_sd);
+
+  if (SSL_accept(ssl) <= 0) {
+    ERR_print_errors_fp(stderr);
+  } else {
+    char buffer[1024] = {0};
+    SSL_read(ssl, buffer, sizeof(buffer));
+    printf("Client says: %s\n", buffer);
+
+    const char msg[] = "Hello from Upanix TLS Server!";
+    SSL_write(ssl, msg, strlen(msg) + 1);
+  }
+
+  SSL_shutdown(ssl);
+  SSL_free(ssl);
+  close(new_sd);
+  close(sd);
+}
+
+static void test_tcp_tls_client(const upan::string& host) {
+  int sd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sd < 0) {
+    throw upan::exception(XLOC, "socket() failed");
+  }
+
+  struct timeval timeout {};
+  timeout.tv_sec = 5;
+  timeout.tv_usec = 0;
+  if (setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+    close(sd);
+    throw upan::exception(XLOC, "failed to set socket option: SO_RCVTIMEO");
+  }
+
+  struct sockaddr_in server_addr;
+  memset(&server_addr, 0, sizeof(server_addr));
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_port = htons(TEST_TCP_TLS_SERVER_PORT);
+  server_addr.sin_addr.s_addr = upan::net::inet_strton(host.c_str());
+
+  if (connect(sd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+    close(sd);
+    throw upan::exception(XLOC, "connect() failed");
+  }
+
+  printf("\nConnected to %s:%d", host.c_str(), TEST_TCP_TLS_SERVER_PORT);
+
+  SSL *ssl = SSL_new(upan::net::ssl_context::instance().getClientCtx());
+  SSL_set_fd(ssl, sd);
+
+  if (SSL_connect(ssl) <= 0) {
+    ERR_print_errors_fp(stderr);
+  } else {
+    char buffer[1024] = "Hello from Upanix TLS Client!";
+    SSL_write(ssl, buffer, strlen(buffer) + 1);
+
+    buffer[0] = '\0';
+    SSL_read(ssl, buffer, sizeof(buffer));
+    printf("\nTLS Server replied: %s\n", buffer);
+  }
+
+  SSL_shutdown(ssl);
+  SSL_free(ssl);
+  close(sd);
+}
+
 void sig_handler(int signum) {
   printf("\nCaught signal: %d", signum);
 }
@@ -327,6 +489,10 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
       test_tcp_server();
     } else if (type == "tcp-client") {
       test_tcp_client(cmdExec.params()[1]);
+    } else if (type == "tcp-tls-server") {
+      test_tcp_tls_server();
+    } else if (type == "tcp-tls-client") {
+      test_tcp_tls_client(cmdExec.params()[1]);
     } else if (type == "recurse") {
       int count = atoi(cmdExec.params()[1].c_str());
       printf("\n Stack Limit Test - Recurse %d times", count);
@@ -354,16 +520,42 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
         int exitStatus;
         waitpid(id, &exitStatus, 0);
       }
+    } else if (type == "pthreads") {
+      pthread_mutex_init(&pmutex, nullptr);
+
+      upan::vector<pthread_t> threads;
+      threads.push_back(pthread_t());
+      threads.push_back(pthread_t());
+      threads.push_back(pthread_t());
+      threads.push_back(pthread_t());
+
+      counter1 = 0;
+      counter2 = 0;
+      counter3 = 0;
+      counter4 = 0;
+
+      pthread_create(&threads[0], nullptr, pthread_loop, (void*)1);
+      pthread_create(&threads[1], nullptr, pthread_loop, (void*)2);
+      pthread_create(&threads[2], nullptr, pthread_loop, (void*)3);
+      pthread_create(&threads[3], nullptr, pthread_loop, (void*)4);
+
+      for(auto id : threads) {
+        void* ret;
+        pthread_join(id, &ret);
+        printf("\n (p)Thread Joined: %lu", (uint64_t)ret);
+      }
+
+      pthread_mutex_lock(&pmutex);
     } else if (type == "mem") {
       uint32_t s = btime();
       upan::map<int, int> m;
-      for(int i = 0; i < 1000000; ++i) {
+      for (int i = 0; i < 1000000; ++i) {
         m.insert(upan::map<int, int>::value_type(i, i * 10));
       }
       uint32_t e = btime();;
       printf("\n Map size: %d, Time Taken: %u", m.size(), e - s);
     } else if (type == "lock") {
-      int threadID = exect(lock_thread, nullptr, true);
+      __attribute__((unused)) int threadID = exect(lock_thread, nullptr, true);
       btime();
     } else if (type == "fs") {
       create("/test.log", ATTR_FILE_DEFAULT);
