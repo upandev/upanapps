@@ -34,6 +34,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <ussl.h>
+#include <sys/wait.h>
 
 //test functions
 static void recurse(int count) {

@@ -24,6 +24,7 @@
 # include <Msh.h>
 # include <mosstd.h>
 # include <malloc.h>
+# include <sys/wait.h>
 
 MshCommandExecutor::MshCommandExecutor(const upan::string& cmdLine) : _cmd(upan::option<MshCommand*>::empty()), _runInBG(false) {
   parse(cmdLine);
