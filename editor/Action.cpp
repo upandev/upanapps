@@ -77,7 +77,7 @@ void Action_FileSave()
 	ENode* temp ;
 	int fd ;
 
-	if((fd = open(Edit_szFilename, O_RDWR | O_TRUNC )) < 0)
+	if((fd = open(Edit_szFilename, O_RDWR | O_TRUNC, ATTR_FILE_DEFAULT)) < 0)
 		return ;
 
 	char buffer[512] ;

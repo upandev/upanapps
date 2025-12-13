@@ -180,7 +180,7 @@ void print_output(const upan::string& msg) {
 }
 
 void reader_thread(void* stime) {
-  upan::file_stream rstream("/test.log", O_RDONLY);
+  upan::file_stream rstream("/test.log", O_RDONLY, 0);
   rstream.seek_end(0);
 
   upan::string line;
@@ -194,7 +194,7 @@ void reader_thread(void* stime) {
 }
 
 void writer_thread(void* stime) {
-  upan::file_stream wstream("/test.log", O_RDWR | O_APPEND);
+  upan::file_stream wstream("/test.log", O_RDWR | O_APPEND, ATTR_FILE_DEFAULT);
   char buf[128];
   for(int i = 0; i < 1000; ++i) {
     sprintf(buf, "Write line %d from Thread %d\n", btime(), getpid());
@@ -451,7 +451,10 @@ void sig_segv_avoid(int signum, siginfo_t* info, void* context) {
 void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
   if (cmdExec.params().size()) {
     const upan::string& type = cmdExec.params()[0];
-    if (type == "sig_segv") {
+    if (type == "sigalarm") {
+      printf("\n setting alarm for 5 seconds");
+      alarm(5);
+    } else if (type == "sig_segv") {
       struct sigaction sa;
       memset(&sa, 0, sizeof(struct sigaction));
       sa.sa_flags = SA_SIGINFO;
