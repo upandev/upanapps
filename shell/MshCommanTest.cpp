@@ -607,6 +607,61 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
                              INADDR_MAC_BROADCAST[4],
                              INADDR_MAC_BROADCAST[5]);
       test_initialized_globals();
+    } else if (type == "fork") {
+      printf("\n Forking");
+
+      int fd_ptoc[2];
+
+      if (pipe(fd_ptoc) < 0) {
+        throw upan::exception(XLOC, "pipe() failed - ptoc");
+      }
+
+      int fd_ctop[2];
+      if (pipe(fd_ctop) < 0) {
+        throw upan::exception(XLOC, "pipe() failed - ctop");
+      }
+
+      char buf[512];
+
+      int pid = fork();
+      if (pid == 0) {
+        close (fd_ptoc[1]);
+        close (fd_ctop[0]);
+
+        strcpy(buf, "Hello from child");
+        write(fd_ctop[1], buf, strlen(buf));
+
+        int n = read(fd_ptoc[0], buf, 512);
+        if (n < 0) {
+          throw upan::exception(XLOC, "read() failed");
+        }
+        buf[n] = '\0';
+
+        printf("\n Child process - received: %s", buf);
+
+        close(fd_ptoc[0]);
+        close(fd_ctop[1]);
+        exit(0);
+      } else {
+        close (fd_ptoc[0]);
+        close (fd_ctop[1]);
+
+        int n = read(fd_ctop[0], buf, 512);
+        if (n < 0) {
+          throw upan::exception(XLOC, "read() failed");
+        }
+        buf[n] = '\0';
+
+        printf("\n Parent process - received: %s", buf);
+        strcpy(buf, "Hello from parent");
+        write(fd_ptoc[1], buf, strlen(buf));
+
+        close (fd_ptoc[1]);
+        close (fd_ctop[0]);
+
+        printf("\n Parent process - waiting for child to exit");
+        waitpid(pid, nullptr, 0);
+      }
     }
   }
 }
