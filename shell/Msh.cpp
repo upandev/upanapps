@@ -127,7 +127,7 @@ void Msh::start() {
   CloseButtonMouseHandler closeButtonMouseHandler;
   closeBt.registerMouseEventHandler(closeButtonMouseHandler);
 
-  gc.eventManager().startTerminalEventLoop();
+  gc.eventManager().startEventLoop();
 
   exit(0);
 }
