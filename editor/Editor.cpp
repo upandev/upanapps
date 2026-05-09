@@ -132,10 +132,10 @@ public:
     }
     else
     {
-      if(toascii(key.getCh()) > 30 || key.getCh() == Keyboard_ENTER || key.getCh() == '\t')
+      if(toascii(key.getCh()) > 30 || key.getCh() == Keyboard_ENTER || key.getCh() == Keyboard_CTRL_J || key.getCh() == '\t')
       {
         auto ch = key.getCh();
-        if(ch == Keyboard_ENTER)
+        if(ch == Keyboard_ENTER || ch == Keyboard_CTRL_J)
           ch = '\n' ;
 
         Edit_InsertCh(ch) ;

@@ -138,7 +138,7 @@ void Action_OkCancel()
 
 	auto key = upanui::GraphicsContext::Instance().eventManager().getCh();
 
-	while(key.getCh() != Keyboard_ENTER)
+	while(key.getCh() != Keyboard_CTRL_J && key.getCh() != Keyboard_ENTER)
 	{
 	  if(key.getCh() == Keyboard_TAB && ok == 1)
 		{

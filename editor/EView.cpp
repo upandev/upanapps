@@ -104,7 +104,7 @@ static void win_scan(MWindow* pMsgWin, char* tempfl) {
   while(true) {
     auto key = upanui::GraphicsContext::Instance().eventManager().getCh();
 
-    if (key.getCh() == Keyboard_ENTER) {
+    if (key.getCh() == Keyboard_CTRL_J || key.getCh() == Keyboard_ENTER) {
       tempfl[i] = '\0';
       return;
     } else if(key.getCh() == Keyboard_BACKSPACE) {
@@ -414,6 +414,7 @@ void EView_HandleMenuActions(const upanui::KeyboardData& key) {
       res = -1 ;
       break ;
     case Keyboard_ENTER:
+    case Keyboard_CTRL_J:
       over = true ;
       res = _currentMenuIndex ;
       break ;
@@ -446,7 +447,7 @@ void EView_HandleMenuActions(const upanui::KeyboardData& key) {
 }
 
 void EView_HandleHelpDialogActions(const upanui::KeyboardData& key) {
-  if (key.getCh() != Keyboard_ENTER) {
+  if (key.getCh() != Keyboard_ENTER && key.getCh() != Keyboard_CTRL_J) {
     return;
   }
 
