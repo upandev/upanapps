@@ -38,6 +38,7 @@ public:
   }
 
   void start();
+  void stop(int exitCode);
 
   typedef upan::map<upan::string, MshCommand*> CmdMap;
 

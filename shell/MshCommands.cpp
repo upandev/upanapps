@@ -43,7 +43,7 @@ void MshCommandClearScreen::execute(const MshCommandExecutor& cmdExec) {
 }
 
 void MshCommandExit::execute(const MshCommandExecutor& cmdExec) {
-  exit(0);
+  Msh::Instance().stop(0);
 }
 
 void MshCommandCreateDir::execute(const MshCommandExecutor& cmdExec) {

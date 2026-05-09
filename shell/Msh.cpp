@@ -94,7 +94,7 @@ public:
   void onEvent(upanui::UIObject& uiObject, const upanui::MouseEvent& event) override {
     const upanui::MouseData& data = event.getData();
     if (data.leftButtonState() == upanui::MouseData::RELEASED) {
-      exit(0);
+      Msh::Instance().stop(0);
     }
   }
 };
@@ -127,7 +127,10 @@ void Msh::start() {
   CloseButtonMouseHandler closeButtonMouseHandler;
   closeBt.registerMouseEventHandler(closeButtonMouseHandler);
 
-  gc.eventManager().startEventLoop();
-
-  exit(0);
+  exit(gc.eventManager().startEventLoop());
 }
+
+void Msh::stop(int exitCode) {
+  upanui::GraphicsContext::Instance().eventManager().stopEventLoop(exitCode);
+}
+
