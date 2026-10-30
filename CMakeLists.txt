@@ -99,6 +99,7 @@ include_directories(${UPANLIB_SOURCE_DIR}/libupanui/text/)
 include_directories(${UPANLIB_SOURCE_DIR}/libupanui/text/default)
 include_directories(${UPANLIB_SOURCE_DIR}/libupanui/text/usfn)
 include_directories(${UPANLIB_SOURCE_DIR}/libupanui/text/textarea)
+include_directories(${UPANLIB_SOURCE_DIR}/libupanui/text/textarea/fixed)
 include_directories(${UPANLIB_SOURCE_DIR}/libupanui/interop/includes)
 
 include_directories(${UPANEXLIB_SOURCE_DIR}/libupanssl)

@@ -141,7 +141,7 @@ void Clock::run() {
       const int h = (dateTime._hour * 5 + int(dateTime._minute * _htomFactor)) % 60;
       _hourHand->updateXY(_cx, _cy, _cx + _hourSteps[h].x(), _cy - _hourSteps[h].y());
 
-      sleepms(1000);
+      millisleep(1000);
     }
   } catch (const upan::exception &e) {
     printf("App failed with error: %s", e.ErrorMsg().c_str());
