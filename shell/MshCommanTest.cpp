@@ -174,11 +174,6 @@ static void* pthread_loop(void* x) {
   return (void*)((uint64_t)getpid());
 }
 
-void print_output(const upan::string& msg) {
-  upan::mutex_guard g(getM());
-  printf("\n Thread : %d -> %s", getpid(), msg.c_str());
-}
-
 void reader_thread(void* stime) {
   upan::file_stream rstream("/test.log", O_RDONLY, 0);
   rstream.seek_end(0);
@@ -186,7 +181,9 @@ void reader_thread(void* stime) {
   upan::string line;
   for(int i = 0; i < 2000;) {
     if (rstream.read_line(line)) {
-      print_output(line);
+      if ( (i % 100) == 0) {
+        printf("\n Read 100 lines -> Thread : %d -> %s", getpid(), line.c_str());
+      }
       ++i;
     }
     //sleep(1);
@@ -197,8 +194,11 @@ void writer_thread(void* stime) {
   upan::file_stream wstream("/test.log", O_RDWR | O_APPEND, ATTR_FILE_DEFAULT);
   char buf[128];
   for(int i = 0; i < 1000; ++i) {
-    sprintf(buf, "Write line %d from Thread %d\n", btime(), getpid());
+    sprintf(buf, "Write line %ld from Thread %d\n", btime(), getpid());
     wstream.write(buf, strlen(buf));
+    if ((i % 100) == 0) {
+      printf("\n Wrote %d lines so far (%d)", i, getpid());
+    }
     //sleep(1);
   }
 }
@@ -662,6 +662,8 @@ void MshCommandTest::execute(const MshCommandExecutor& cmdExec) {
         printf("\n Parent process - waiting for child to exit");
         waitpid(pid, nullptr, 0);
       }
+    } else if (type == "misc") {
+      printf("\n RDTSC: %llu", rdtsc());
     }
   }
 }
